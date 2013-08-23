@@ -5,26 +5,21 @@ require "led_query/sesame_store"
 class DatabaseTest < Minitest::Test
 
   def setup
-    @DB = LEDQuery::Database
-
-    # XXX: relying on remote server
-    host = @DB::TRIPLESTORE
-    host = host.sub(URI.parse(host).path, "")
     @repo = "ledtest"
+    # XXX: relying on remote server
+    url = "http://store.led.innoq.com:8080/openrdf-sesame/repositories/#{@repo}"
+    @DB = LEDQuery::Database.new(url)
+
+    host = url.sub(URI.parse(url).path, "")
     @store = LEDQuery::SesameStore.new("#{host}/openrdf-workbench")
     @store.create_repo @repo, "owlim-lite", "owl-max-optimized"
 
     @led = "http://data.uba.de/led/"
     @common = File.expand_path("../fixtures/common.ttl", __FILE__)
-
-    # change repo -- XXX: hacky!
-    @DB::TRIPLESTORE.sub!(/$/, "test")
   end
 
   def teardown
     @store.delete_repo @repo
-
-    @DB::TRIPLESTORE.sub!(/test$/, "")
   end
 
   def test_dimensions

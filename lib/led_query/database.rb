@@ -1,9 +1,7 @@
 require "led_query"
 require "led_query/sparql"
 
-module LEDQuery::Database # TODO: should be a class
-
-  TRIPLESTORE = "http://store.led.innoq.com:8080/openrdf-sesame/repositories/led" # XXX: hard-coded
+class LEDQuery::Database
 
   class Link # XXX: does not belong here
     attr_reader :uri
@@ -24,10 +22,14 @@ module LEDQuery::Database # TODO: should be a class
 
   end
 
+  def initialize(triplestore)
+    @triplestore = triplestore
+  end
+
   # determine observations for the given concepts and from the given sources
   # (all URIs)
   # returns a list of hashes representing individual observations
-  def self.determine_observations(concepts_by_dimension)
+  def determine_observations(concepts_by_dimension)
     conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
         map do |(dim, concepts), i|
       concepts = concepts.map { |uri| "<#{uri}>" }.join(", ")
@@ -60,7 +62,7 @@ WHERE {
 }
     EOS
 
-    res = LEDQuery::SPARQL.query(TRIPLESTORE, query)
+    res = LEDQuery::SPARQL.query(@triplestore, query)
     return res["results"]["bindings"].map do |result| # TODO: error handling
       analyte_label = result["albl"]["value"] rescue nil
       location_label = result["llbl"]["value"] rescue nil
@@ -85,7 +87,7 @@ WHERE {
   # to those co-occurring with the given set of concepts from other dimensions
   # returns a hash of concepts by type - concepts are URI/labels pairs, with
   # labels indexed by language
-  def self.determine_concepts(dimensions, concepts_by_dimension={},
+  def determine_concepts(dimensions, concepts_by_dimension={},
       include_observations_count=false) # TODO: refactor, improve API
     make_query = lambda do |variables, conditions|
       query = <<-EOS.strip
@@ -96,7 +98,7 @@ SELECT #{variables} WHERE {
 #{conditions}
 }
       EOS
-      return LEDQuery::SPARQL.query(TRIPLESTORE, query)
+      return LEDQuery::SPARQL.query(@triplestore, query)
     end
     unionize = lambda do |arr|
       return arr.length == 1 ? arr[0] : "\n{\n#{arr.join("\n} UNION {\n")}\n}\n"
@@ -138,7 +140,7 @@ SELECT #{variables} WHERE {
     end
   end
 
-  def self.determine_dimensions
+  def determine_dimensions
     query = <<-EOS.strip
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX qb:<http://purl.org/linked-data/cube#>
@@ -153,7 +155,7 @@ SELECT DISTINCT ?dim ?label WHERE {
     return determine_labeled_resources(query, "dim")
   end
 
-  def self.observations_count(concepts_by_dimension={})
+  def observations_count(concepts_by_dimension={})
     conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
         map do |(dim, concepts), i|
       concepts = concepts.map { |uri| "<#{uri}>" }.join(", ")
@@ -171,13 +173,13 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
 }
     EOS
 
-    res = LEDQuery::SPARQL.query(TRIPLESTORE, query)
+    res = LEDQuery::SPARQL.query(@triplestore, query)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
   end
 
   # returns a hash of URI/labels pairs, with labels indexed by language
-  def self.determine_labeled_resources(query, binding) # TODO: rename
-    res = LEDQuery::SPARQL.query(TRIPLESTORE, query)
+  def determine_labeled_resources(query, binding) # TODO: rename
+    res = LEDQuery::SPARQL.query(@triplestore, query)
     return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       id = result[binding]["value"]
       memo[id] ||= {}
@@ -190,7 +192,7 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
   end
 
   # `var` is used as suffix to create pseudo-local variables
-  def self.dimension_query(dim, var=nil) # TODO: rename
+  def dimension_query(dim, var=nil) # TODO: rename
     return <<-EOS.rstrip
     <#{dim}> qb:codeList ?scheme#{var} .
     ?concept#{var} skos:inScheme ?scheme#{var} .
