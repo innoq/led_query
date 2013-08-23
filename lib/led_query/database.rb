@@ -122,7 +122,7 @@ SELECT #{variables} WHERE {
           "OPTIONAL { ?concept skos:prefLabel ?label }"].join("\n    ")
     end
     conditions = unionize.call(conditions)
-    conditions = (pre_existing_conditions + [conditions]).join("\n")
+    conditions = ([conditions] + pre_existing_conditions).join("\n")
 
     res = make_query.call("DISTINCT ?type ?concept ?label", conditions)
     concepts_by_type = res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
