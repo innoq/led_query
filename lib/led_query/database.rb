@@ -22,8 +22,12 @@ class LEDQuery::Database
 
   end
 
-  def initialize(triplestore)
+  # `triplestore` is the URL of the Sesame repository (typically
+  # .../openrdf-sesame/repositories/my-repo`)
+  # `logger` is an optional Logger (or compatbile) instance
+  def initialize(triplestore, logger=nil)
     @triplestore = triplestore
+    @logger = logger
   end
 
   # determine observations for the given concepts and from the given sources
@@ -62,7 +66,7 @@ WHERE {
 }
     EOS
 
-    res = LEDQuery::SPARQL.query(@triplestore, query)
+    res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
     return res["results"]["bindings"].map do |result| # TODO: error handling
       analyte_label = result["albl"]["value"] rescue nil
       location_label = result["llbl"]["value"] rescue nil
@@ -98,7 +102,7 @@ SELECT #{variables} WHERE {
 #{conditions}
 }
       EOS
-      return LEDQuery::SPARQL.query(@triplestore, query)
+      return LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
     end
     unionize = lambda do |arr|
       return arr.length == 1 ? arr[0] : "\n{\n#{arr.join("\n} UNION {\n")}\n}\n"
@@ -173,13 +177,13 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
 }
     EOS
 
-    res = LEDQuery::SPARQL.query(@triplestore, query)
+    res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
   end
 
   # returns a hash of URI/labels pairs, with labels indexed by language
   def determine_labeled_resources(query, binding) # TODO: rename
-    res = LEDQuery::SPARQL.query(@triplestore, query)
+    res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
     return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       id = result[binding]["value"]
       memo[id] ||= {}

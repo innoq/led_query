@@ -5,9 +5,10 @@ require "led_query"
 module LEDQuery::SPARQL
 
   # returns HTTP response if the request failed
-  def self.query(endpoint, query, infer=false)
+  def self.query(endpoint, query, infer=false, logger=nil)
     params = { "query" => query }
     params[:infer] = false unless infer
+    logger.debug "==== SPARQL\n#{query}\n----" if logger
     res = http_request("POST", endpoint, params,
         { "Accept" => "application/sparql-results+json" })
     return res.code == "200" ? JSON.load(res.body) : res
