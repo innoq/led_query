@@ -57,7 +57,7 @@ WHERE {
     ?obs a qb:Observation .
     ?obs led:mean ?mean .
     ?obs led:uom ?uom .
-    ?obs led:time ?time .
+    ?obs led:temporal ?time .
     ?time dct:start ?startTime .
     ?time dct:end ?endTime .
     OPTIONAL { ?analyte skos:prefLabel ?albl . }
