@@ -175,28 +175,28 @@ led:obs123 a qb:Observation;
     qb:dataSet led:eea;
     led:analyte led:ammonium;
     led:location led:berlin;
-    led:time [ dct:start 2001; dct:end 2001 ];
+    led:temporal [ dct:start 2001; dct:end 2001 ];
     led:mean 1.23;
     led:uom "mg/l N".
 led:obs321 a qb:Observation;
     qb:dataSet led:eea;
     led:analyte led:ammonium;
     led:location led:berlin;
-    led:time [ dct:start 1996; dct:end 1996 ];
+    led:temporal [ dct:start 1996; dct:end 1996 ];
     led:mean 3.21;
     led:uom "mg/l N".
 led:obs456 a qb:Observation;
     qb:dataSet led:eea;
     led:analyte led:phosphorus;
     led:location led:hamburg;
-    led:time [ dct:start 2007; dct:end 2007 ];
+    led:temporal [ dct:start 2007; dct:end 2007 ];
     led:mean 4.56;
     led:uom "mg/l P".
 led:obs789 a qb:Observation;
     qb:dataSet led:upb;
     led:analyte led:nitrogen;
     led:location led:berlin;
-    led:time [ dct:start 2011; dct:end 2011 ];
+    led:temporal [ dct:start 2011; dct:end 2011 ];
     led:mean 7.89;
     led:uom "mg/l N".
     EOS
