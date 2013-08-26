@@ -66,7 +66,7 @@ WHERE {
 }
     EOS
 
-    @logger.info "querying observations"
+    log :info, "querying observations"
     res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
     return res["results"]["bindings"].map do |result| # TODO: error handling
       analyte_label = result["albl"]["value"] rescue nil
@@ -103,7 +103,7 @@ SELECT #{variables} WHERE {
 #{conditions}
 }
       EOS
-      @logger.info "querying concepts"
+      log :info, "querying concepts"
       return LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
     end
     unionize = lambda do |arr|
@@ -158,7 +158,7 @@ SELECT DISTINCT ?dim ?label WHERE {
     }
 }
     EOS
-    @logger.info "querying dimensions"
+    log :info, "querying dimensions"
     return determine_labeled_resources(query, "dim")
   end
 
@@ -180,7 +180,7 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
 }
     EOS
 
-    @logger.info "querying observations count"
+    log :info, "querying observations count"
     res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
   end
@@ -207,6 +207,10 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     ?obs ?unused#{var} ?concept#{var} .
     ?obs a qb:Observation .
     EOS
+  end
+
+  def log(level, msg)
+    @logger.send(level, msg) if @logger
   end
 
 end
