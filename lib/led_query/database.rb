@@ -36,7 +36,7 @@ class LEDQuery::Database
   def determine_observations(concepts_by_dimension)
     conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
         map do |(dim, concepts), i|
-      concepts = concepts.map { |uri| "<#{uri}>" }.join(", ")
+      concepts = resource_list(concepts)
       [dimension_query(dim, i), "FILTER(?concept#{i} IN (#{concepts}))"].
           join("\n    ")
     end.join("\n")
@@ -112,7 +112,7 @@ SELECT #{variables} WHERE {
 
     pre_existing_conditions = concepts_by_dimension.each_with_index.
         map do |(dim, concepts), i|
-      concepts = concepts.map { |uri| "<#{uri}>" }.join(", ")
+      concepts = resource_list(concepts)
       [dimension_query(dim, i), "FILTER(?concept#{i} IN (#{concepts}))"].
           join("\n    ")
     end
@@ -165,7 +165,7 @@ SELECT DISTINCT ?dim ?label WHERE {
   def observations_count(concepts_by_dimension={})
     conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
         map do |(dim, concepts), i|
-      concepts = concepts.map { |uri| "<#{uri}>" }.join(", ")
+      concepts = resource_list(concepts)
       [dimension_query(dim, i), "FILTER(?concept#{i} IN (#{concepts}))"].
           join("\n    ")
     end.join("\n")
@@ -207,6 +207,10 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     ?obs ?unused#{var} ?concept#{var} .
     ?obs a qb:Observation .
     EOS
+  end
+
+  def resource_list(concepts)
+    return concepts.map { |concept| "<#{concept}>" }.join(", ")
   end
 
   def log(level, msg)
