@@ -233,4 +233,93 @@ led:obs789 a qb:Observation;
     assert_equal count, 1
   end
 
+  def test_time_handling
+    prefixes = "@prefix dct: <http://purl.org/dc/terms/>."
+    rdf = prefixes + File.read(@common) + <<-EOS
+led:eea a qb:DataSet, skos:Concept;
+    skos:inScheme led:sourceScheme;
+    skos:prefLabel "Europäische Umweltagentur"@de.
+
+led:berlin a skos:Concept;
+    skos:inScheme led:locationScheme;
+    skos:prefLabel "Berlin"@de.
+led:hamburg a skos:Concept;
+    skos:inScheme led:locationScheme;
+    skos:prefLabel "Hamburg"@de.
+
+led:ammonium rdf:type skos:Concept;
+    skos:inScheme led:analyteScheme;
+    skos:prefLabel "Ammonium"@de.
+led:phosphorus a skos:Concept;
+    skos:inScheme led:analyteScheme;
+    skos:prefLabel "Phosphor"@de.
+led:nitrogen a skos:Concept;
+    skos:inScheme led:analyteScheme;
+    skos:prefLabel "Stickstoff"@de.
+
+led:obs123 a qb:Observation;
+    qb:dataSet led:eea;
+    led:analyte led:ammonium;
+    led:location led:berlin;
+    led:temporal [ dct:start 2001; dct:end 2001 ];
+    led:mean 1.23;
+    led:uom "mg/l N".
+led:obs321 a qb:Observation;
+    qb:dataSet led:eea;
+    led:analyte led:nitrogen;
+    led:location led:berlin;
+    led:temporal [ dct:start 2001; dct:end 2001 ];
+    led:mean 3.21;
+    led:uom "mg/l N".
+led:obs456 a qb:Observation;
+    qb:dataSet led:eea;
+    led:analyte led:phosphorus;
+    led:location led:hamburg;
+    led:temporal [ dct:start 2007; dct:end 2007 ];
+    led:mean 4.56;
+    led:uom "mg/l P".
+led:obs789 a qb:Observation;
+    qb:dataSet led:eea;
+    led:analyte led:ammonium;
+    led:location led:berlin;
+    led:temporal [ dct:start 2011; dct:end 2011 ];
+    led:mean 7.89;
+    led:uom "mg/l N".
+    EOS
+    @store.add_triples @repo, "text/turtle", rdf
+
+    count = @DB.observations_count
+    assert_equal count, 4
+
+    selected_concepts = { "#{@led}temporal" => ["2001"] }
+    count = @DB.observations_count(selected_concepts)
+    observations = @DB.determine_observations(selected_concepts)
+    assert_equal count, 2
+    assert_equal observations.length, count
+    results = observations.map do |obs|
+      ["obs", "mean", "uom", "time", "analyte", "location", "source"].
+          map { |key| obs[key].to_s }.join(" | ")
+    end.sort.join("\n")
+    assert_equal results, <<-EOS.strip
+#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+    EOS
+
+    selected_concepts = {
+      "#{@led}temporal" => ["2001"],
+      "#{@led}analyte" => ["#{@led}nitrogen"]
+    }
+    count = @DB.observations_count(selected_concepts)
+    observations = @DB.determine_observations(selected_concepts)
+    assert_equal count, 1
+    assert_equal observations.length, count
+    results = observations.map do |obs|
+      ["obs", "mean", "uom", "time", "analyte", "location", "source"].
+          map { |key| obs[key].to_s }.join(" | ")
+    end.sort.join("\n")
+    assert_equal results, <<-EOS.strip
+#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+    EOS
+  end
+
 end

@@ -96,6 +96,7 @@ WHERE {
       include_observations_count=false) # TODO: refactor, improve API
     make_query = lambda do |variables, conditions|
       query = <<-EOS.strip
+PREFIX dct:<http://purl.org/dc/terms/>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX qb:<http://purl.org/linked-data/cube#>
 
@@ -171,6 +172,7 @@ SELECT DISTINCT ?dim ?label WHERE {
     end.join("\n")
 
     query = <<-EOS.strip
+PREFIX dct:<http://purl.org/dc/terms/>
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX qb:<http://purl.org/linked-data/cube#>
 
@@ -201,6 +203,14 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
 
   # `var` is used as suffix to create pseudo-local variables
   def dimension_query(dim, var=nil) # TODO: rename
+    if dim == "http://data.uba.de/led/temporal" # XXX: special-casing
+      return <<-EOS.rstrip
+      ?obs <#{dim}> ?time#{var} .
+      ?time#{var} dct:start ?concept#{var} .
+      ?obs a qb:Observation .
+      EOS
+    end
+
     return <<-EOS.rstrip
     <#{dim}> qb:codeList ?scheme#{var} .
     ?concept#{var} skos:inScheme ?scheme#{var} .
@@ -210,7 +220,14 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
   end
 
   def resource_list(concepts)
-    return concepts.map { |concept| "<#{concept}>" }.join(", ")
+    res = concepts.map do |concept|
+      begin # number -- XXX: special-casing for years
+        Float(concept).to_i
+      rescue ArgumentError # URI
+        "<#{concept}>"
+      end
+    end.join(", ")
+    return res
   end
 
   def log(level, msg)
