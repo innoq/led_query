@@ -7,10 +7,10 @@ class DatabaseTest < DefaultTest
 
     dimensions = @DB.determine_dimensions
     assert_equal dimensions.keys.sort, ["#{@led}analyte", "#{@led}location",
-        "#{@led}observedMedia", "#{@led}source"]
+        "#{@led}observedMedia", "#{@led}source", "#{@led}temporal"]
     assert_equal dimensions.values.map(&:inspect).sort, ['{"de"=>"Analyt"}',
         '{"de"=>"Datenquelle"}', '{"de"=>"Raumbezug"}',
-        '{"de"=>"Untersuchungsmedium"}']
+        '{"de"=>"Untersuchungsmedium"}', '{"de"=>"Zeitrahmen"}']
   end
 
   def test_concepts
