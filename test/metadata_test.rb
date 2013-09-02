@@ -11,7 +11,9 @@ led:soil123 a dcat:Dataset, qb:Observation;
     led:location led:westerzgebirge;
     led:observedMedia led:groundwater;
     led:analyte led:sand;
-    led:temporal [ dct:start 1996; dct:end 1996 ].
+    led:temporal [ dct:start 1996; dct:end 1996 ];
+    dct:title "Hello World"@de;
+    dct:description "lorem ipsum dolor sit amet"@de.
 
 led:bodenportal a qb:DataSet, skos:Concept;
     skos:inScheme led:sourceScheme;
@@ -38,11 +40,11 @@ led:sand a skos:Concept;
     assert_equal count, 1
     assert_equal observations.length, count
     results = observations.map do |obs|
-      ["obs", "mean", "uom", "time", "analyte", "location", "source"].
-          map { |key| obs[key].to_s }.join(" | ")
+      ["obs", "mean", "uom", "title", "desc", "time", "analyte", "location",
+          "source"].map { |key| obs[key].to_s }.join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
-#{@led}soil123 |  |  | [1996, 1996] | "Sand"<#{@led}sand> | "Westerzgebirge"<#{@led}westerzgebirge> | "Bodenportal"<#{@led}bodenportal>
+#{@led}soil123 |  |  | Hello World | lorem ipsum dolor sit amet | [1996, 1996] | "Sand"<#{@led}sand> | "Westerzgebirge"<#{@led}westerzgebirge> | "Bodenportal"<#{@led}bodenportal>
     EOS
   end
 

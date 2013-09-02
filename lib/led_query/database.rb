@@ -48,7 +48,8 @@ PREFIX qb:<http://purl.org/linked-data/cube#>
 PREFIX led:<http://data.uba.de/led/>
 
 SELECT DISTINCT
-    ?obs ?mean ?uom ?analyte ?location ?startTime ?endTime ?dataset ?albl ?llbl ?dlbl
+    ?obs ?mean ?uom ?title ?desc ?analyte ?location ?startTime ?endTime ?dataset
+    ?albl ?llbl ?dlbl
 WHERE {
 #{conditions}
     ?obs led:analyte ?analyte .
@@ -57,6 +58,8 @@ WHERE {
     ?obs a qb:Observation .
     OPTIONAL { ?obs led:mean ?mean } .
     OPTIONAL { ?obs led:uom ?uom } .
+    OPTIONAL { ?obs dct:title ?title } .
+    OPTIONAL { ?obs dct:description ?desc } .
     ?obs led:temporal ?time .
     ?time dct:start ?startTime .
     ?time dct:end ?endTime .
@@ -78,6 +81,8 @@ WHERE {
         # XXX: hard-coding data types for now
         "mean" => (Float(result["mean"]["value"]) rescue nil),
         "uom" => (result["uom"]["value"] rescue nil),
+        "title" => (result["title"]["value"] rescue nil),
+        "desc" => (result["desc"]["value"] rescue nil),
         "analyte" => Link.new(result["analyte"]["value"], analyte_label),
         "location" => Link.new(result["location"]["value"], location_label),
         "source" => Link.new(result["dataset"]["value"], source_label),
