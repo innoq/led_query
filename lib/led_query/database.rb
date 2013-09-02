@@ -55,8 +55,8 @@ WHERE {
     ?obs led:location ?location .
     ?obs qb:dataSet ?dataset .
     ?obs a qb:Observation .
-    ?obs led:mean ?mean .
-    ?obs led:uom ?uom .
+    OPTIONAL { ?obs led:mean ?mean } .
+    OPTIONAL { ?obs led:uom ?uom } .
     ?obs led:temporal ?time .
     ?time dct:start ?startTime .
     ?time dct:end ?endTime .
@@ -76,8 +76,8 @@ WHERE {
       {
         "obs" => result["obs"]["value"],
         # XXX: hard-coding data types for now
-        "mean" => Float(result["mean"]["value"]),
-        "uom" => result["uom"]["value"],
+        "mean" => (Float(result["mean"]["value"]) rescue nil),
+        "uom" => (result["uom"]["value"] rescue nil),
         "analyte" => Link.new(result["analyte"]["value"], analyte_label),
         "location" => Link.new(result["location"]["value"], location_label),
         "source" => Link.new(result["dataset"]["value"], source_label),

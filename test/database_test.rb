@@ -1,26 +1,6 @@
 require File.expand_path("../test_helper.rb", __FILE__)
-require "led_query/database"
-require "led_query/sesame_store"
 
-class DatabaseTest < Minitest::Test
-
-  def setup
-    @repo = "ledtest"
-    # XXX: relying on remote server
-    url = "http://store.led.innoq.com:8080/openrdf-sesame/repositories/#{@repo}"
-    @DB = LEDQuery::Database.new(url)
-
-    host = url.sub(URI.parse(url).path, "")
-    @store = LEDQuery::SesameStore.new("#{host}/openrdf-workbench")
-    @store.create_repo @repo, "owlim-lite", "owl-max-optimized"
-
-    @led = "http://data.uba.de/led/"
-    @common = File.expand_path("../fixtures/common.ttl", __FILE__)
-  end
-
-  def teardown
-    @store.delete_repo @repo
-  end
+class DatabaseTest < DefaultTest
 
   def test_dimensions
     @store.add_triples @repo, "text/turtle", File.read(@common)
