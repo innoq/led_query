@@ -9,7 +9,7 @@ class DefaultTest < Minitest::Test
 
   def setup
     @repo = "ledtest"
-    @DB = database_connection(@repo)
+    @db = database_connection(@repo)
     @store = make_repo(@repo)
 
     @led = "http://data.uba.de/led/"

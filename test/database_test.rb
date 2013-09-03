@@ -5,7 +5,7 @@ class DatabaseTest < DefaultTest
   def test_dimensions
     @store.add_triples @repo, "text/turtle", File.read(@common)
 
-    dimensions = @DB.determine_dimensions
+    dimensions = @db.determine_dimensions
     assert_equal dimensions.keys.sort, ["#{@led}analyte", "#{@led}location",
         "#{@led}observedMedia", "#{@led}source", "#{@led}temporal"]
     assert_equal dimensions.values.map(&:inspect).sort, ['{"de"=>"Analyt"}',
@@ -14,7 +14,7 @@ class DatabaseTest < DefaultTest
   end
 
   def test_concepts
-    concepts, obs_count = @DB.determine_concepts(["#{@led}analyte"], {}, true)
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"], {}, true)
     assert_equal obs_count, 0
     assert_equal concepts, {}
 
@@ -45,7 +45,7 @@ led:obs456 a qb:Observation;
     EOS
     @store.add_triples @repo, "text/turtle", rdf
 
-    concepts, obs_count = @DB.determine_concepts(["#{@led}analyte"], {}, true)
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"], {}, true)
     assert_equal obs_count, 3
     assert_equal concepts, {
       "#{@led}analyte" => {
@@ -54,7 +54,7 @@ led:obs456 a qb:Observation;
       }
     }
 
-    concepts, obs_count = @DB.determine_concepts(["#{@led}analyte"],
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
         { "#{@led}location" => ["#{@led}berlin"] }, true)
     assert_equal obs_count, 2
     assert_equal concepts, {
@@ -63,7 +63,7 @@ led:obs456 a qb:Observation;
       }
     }
 
-    concepts, obs_count = @DB.determine_concepts(["#{@led}analyte"],
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
         { "#{@led}location" => ["#{@led}hamburg"] }, true)
     assert_equal obs_count, 1
     assert_equal concepts, {
@@ -72,7 +72,7 @@ led:obs456 a qb:Observation;
       }
     }
 
-    concepts, obs_count = @DB.determine_concepts(["#{@led}analyte"],
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
         { "#{@led}location" => ["#{@led}berlin", "#{@led}hamburg"] }, true)
     assert_equal obs_count, 3
     assert_equal concepts, {
@@ -102,7 +102,7 @@ led:obs789 a qb:Observation;
     led:location led:berlin.
     EOS
 
-    concepts, obs_count = @DB.determine_concepts(["#{@led}analyte"],
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
         { "#{@led}location" => ["#{@led}berlin"] }, true)
     assert_equal obs_count, 3
     assert_equal concepts, {
@@ -112,7 +112,7 @@ led:obs789 a qb:Observation;
       }
     }
 
-    concepts, obs_count = @DB.determine_concepts(["#{@led}analyte"], {
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"], {
       "#{@led}location" => ["#{@led}berlin"],
       "#{@led}source" => ["#{@led}eea"]
     }, true)
@@ -182,12 +182,12 @@ led:obs789 a qb:Observation;
     EOS
     @store.add_triples @repo, "text/turtle", rdf
 
-    count = @DB.observations_count
+    count = @db.observations_count
     assert_equal count, 4
 
     selected_concepts = { "#{@led}location" => ["#{@led}berlin"] }
-    count = @DB.observations_count(selected_concepts)
-    observations = @DB.determine_observations(selected_concepts)
+    count = @db.observations_count(selected_concepts)
+    observations = @db.determine_observations(selected_concepts)
     assert_equal count, 3
     assert_equal observations.length, count
     results = observations.map do |obs|
@@ -200,13 +200,13 @@ led:obs789 a qb:Observation;
 #{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Umweltprobenbank"<#{@led}upb>
     EOS
 
-    count = @DB.observations_count({
+    count = @db.observations_count({
       "#{@led}location" => ["#{@led}berlin"],
       "#{@led}source" => ["#{@led}eea"]
     })
     assert_equal count, 2
 
-    count = @DB.observations_count({
+    count = @db.observations_count({
       "#{@led}location" => ["#{@led}berlin"],
       "#{@led}source" => ["#{@led}upb"]
     })
@@ -268,12 +268,12 @@ led:obs789 a qb:Observation;
     EOS
     @store.add_triples @repo, "text/turtle", rdf
 
-    count = @DB.observations_count
+    count = @db.observations_count
     assert_equal count, 4
 
     selected_concepts = { "#{@led}temporal" => ["2001"] }
-    count = @DB.observations_count(selected_concepts)
-    observations = @DB.determine_observations(selected_concepts)
+    count = @db.observations_count(selected_concepts)
+    observations = @db.determine_observations(selected_concepts)
     assert_equal count, 2
     assert_equal observations.length, count
     results = observations.map do |obs|
@@ -289,8 +289,8 @@ led:obs789 a qb:Observation;
       "#{@led}temporal" => ["2001"],
       "#{@led}analyte" => ["#{@led}nitrogen"]
     }
-    count = @DB.observations_count(selected_concepts)
-    observations = @DB.determine_observations(selected_concepts)
+    count = @db.observations_count(selected_concepts)
+    observations = @db.determine_observations(selected_concepts)
     assert_equal count, 1
     assert_equal observations.length, count
     results = observations.map do |obs|
