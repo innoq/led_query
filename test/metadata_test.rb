@@ -7,7 +7,7 @@ class MetadataTest < DefaultTest
         "@prefix dct: <http://purl.org/dc/terms/>."].join("\n")
     rdf = prefixes + File.read(@common) + <<-EOS.strip
 led:soil123 a dcat:Dataset, qb:Observation;
-    qb:dataSet led:bodenportal;
+    led:source led:bodenportal;
     led:location led:westerzgebirge;
     led:observedMedia led:groundwater;
     led:analyte led:sand;

@@ -54,7 +54,7 @@ WHERE {
 #{conditions}
     ?obs led:analyte ?analyte .
     ?obs led:location ?location .
-    ?obs qb:dataSet ?dataset .
+    ?obs led:source ?dataset .
     ?obs a qb:Observation .
     OPTIONAL { ?obs led:mean ?mean } .
     OPTIONAL { ?obs led:uom ?uom } .

@@ -97,7 +97,7 @@ led:nitrogen a skos:Concept;
     skos:prefLabel "Stickstoff"@de.
 
 led:obs789 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:nitrogen;
     led:location led:berlin.
     EOS
@@ -152,28 +152,28 @@ led:nitrogen a skos:Concept;
     skos:prefLabel "Stickstoff"@de.
 
 led:obs123 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2001; dct:end 2001 ];
     led:mean 1.23;
     led:uom "mg/l N".
 led:obs321 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 1996; dct:end 1996 ];
     led:mean 3.21;
     led:uom "mg/l N".
 led:obs456 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:phosphorus;
     led:location led:hamburg;
     led:temporal [ dct:start 2007; dct:end 2007 ];
     led:mean 4.56;
     led:uom "mg/l P".
 led:obs789 a qb:Observation;
-    qb:dataSet led:upb;
+    led:source led:upb;
     led:analyte led:nitrogen;
     led:location led:berlin;
     led:temporal [ dct:start 2011; dct:end 2011 ];
@@ -238,28 +238,28 @@ led:nitrogen a skos:Concept;
     skos:prefLabel "Stickstoff"@de.
 
 led:obs123 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2001; dct:end 2001 ];
     led:mean 1.23;
     led:uom "mg/l N".
 led:obs321 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:nitrogen;
     led:location led:berlin;
     led:temporal [ dct:start 2001; dct:end 2001 ];
     led:mean 3.21;
     led:uom "mg/l N".
 led:obs456 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:phosphorus;
     led:location led:hamburg;
     led:temporal [ dct:start 2007; dct:end 2007 ];
     led:mean 4.56;
     led:uom "mg/l P".
 led:obs789 a qb:Observation;
-    qb:dataSet led:eea;
+    led:source led:eea;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2011; dct:end 2011 ];
