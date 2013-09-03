@@ -70,7 +70,7 @@ WHERE {
     EOS
 
     log :info, "querying observations"
-    res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
+    res = sparql(query)
     return res["results"]["bindings"].map do |result| # TODO: error handling
       analyte_label = result["albl"]["value"] rescue nil
       location_label = result["llbl"]["value"] rescue nil
@@ -110,7 +110,7 @@ SELECT #{variables} WHERE {
 }
       EOS
       log :info, "querying concepts"
-      return LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
+      return sparql(query)
     end
     unionize = lambda do |arr|
       return arr.length == 1 ? arr[0] : "\n{\n#{arr.join("\n} UNION {\n")}\n}\n"
@@ -188,13 +188,13 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     EOS
 
     log :info, "querying observations count"
-    res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
+    res = sparql(query)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
   end
 
   # returns a hash of URI/labels pairs, with labels indexed by language
   def determine_labeled_resources(query, binding) # TODO: rename
-    res = LEDQuery::SPARQL.query(@triplestore, query, false, @logger)
+    res = sparql(query)
     return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       id = result[binding]["value"]
       memo[id] ||= {}
@@ -231,6 +231,10 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
       end
     end.join(", ")
     return res
+  end
+
+  def sparql(query, infer=false)
+    return LEDQuery::SPARQL.query(@triplestore, query, infer, @logger)
   end
 
   def log(level, msg)
