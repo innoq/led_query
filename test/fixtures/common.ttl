@@ -13,6 +13,7 @@ led:temporal a qb:DimensionProperty ;
 
 led:sourceScheme a skos:ConceptScheme .
 led:source a qb:DimensionProperty ;
+	rdfs:subpropertyOf qb:dataSet ;
 	skos:prefLabel "Datenquelle"@de ;
 	qb:codeList led:sourceScheme .
 

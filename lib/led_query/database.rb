@@ -217,9 +217,7 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     end
 
     return <<-EOS.rstrip
-    <#{dim}> qb:codeList ?scheme#{var} .
-    ?concept#{var} skos:inScheme ?scheme#{var} .
-    ?obs ?unused#{var} ?concept#{var} .
+    ?obs <#{dim}> ?concept#{var} .
     ?obs a qb:Observation .
     EOS
   end
