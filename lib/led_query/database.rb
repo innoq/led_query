@@ -153,16 +153,25 @@ SELECT #{variables} WHERE {
         lang = label["xml:lang"]
         memo[type][concept][lang] = label["value"]
       end
+      if include_hierarchy
+        memo["_hierarchy"] ||= []
+        memo["_hierarchy"] << ["root", "parent", "concept"].map do |key|
+           result[key]["value"]
+        end
+      end
       memo
     end
+    hierarchy = concepts_by_type.delete("_hierarchy")
 
     if include_observations_count
       res = make_query.call("(COUNT(DISTINCT ?obs) AS ?obsCount)", conditions) # XXX: separate query inefficient
       obs_count = Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
-      return concepts_by_type, obs_count
+      ret = [concepts_by_type, obs_count]
     else
-      return concepts_by_type
+      ret = [concepts_by_type]
     end
+    ret << self.class.resolve_hierarchy(hierarchy) if include_hierarchy
+    return ret.length == 1 ? ret[0] : ret
   end
 
   def determine_dimensions

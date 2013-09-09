@@ -55,62 +55,63 @@ root:
   end
 
   def test_concept_hierarchy
-    rdf = <<-EOS.strip
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix led: <http://data.uba.de/led/> .
-
-led:brd a skos:Concept;
+    rdf = File.read(@common) + <<-EOS
+led:berlin a skos:Concept;
+    skos:inScheme led:locationScheme;
+    skos:broader led:germany;
+    skos:prefLabel "Berlin"@de.
+led:hamburg a skos:Concept;
+    skos:inScheme led:locationScheme;
+    skos:broader led:germany;
+    skos:prefLabel "Hamburg"@de.
+led:munich a skos:Concept;
+    skos:inScheme led:locationScheme;
+    skos:broader led:germany;
+    skos:prefLabel "München"@de.
+led:germany a skos:Concept;
+    skos:inScheme led:locationScheme;
     skos:prefLabel "Bundesrepublik Deutschland"@de.
 
-led:nrw a skos:Concept;
-    skos:broader led:brd;
-    skos:prefLabel "Nordrhein-Westfalen"@de.
+led:ammonium rdf:type skos:Concept;
+    skos:inScheme led:analyteScheme;
+    skos:prefLabel "Ammonium"@de.
+led:phosphorus a skos:Concept;
+    skos:inScheme led:analyteScheme;
+    skos:prefLabel "Phosphor"@de.
 
-led:sl a skos:Concept;
-    skos:broader led:brd;
-    skos:prefLabel "Saarland"@de.
-
-led:cologne a skos:Concept;
-    skos:broader led:nrw;
-    skos:prefLabel "Köln"@de.
-
-led:saarbruecken a skos:Concept;
-    skos:broader led:sl;
-    skos:prefLabel "Saarbrücken"@de.
+led:obs123 a qb:Observation;
+    led:analyte led:ammonium;
+    led:location led:berlin.
+led:obs321 a qb:Observation;
+    led:analyte led:ammonium;
+    led:location led:berlin.
+led:obs456 a qb:Observation;
+    led:analyte led:phosphorus;
+    led:location led:hamburg.
+led:obs789 a qb:Observation;
+    led:analyte led:phosphorus;
+    led:location led:munich.
     EOS
     @store.add_triples @repo, "text/turtle", rdf
     skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
     @store.add_triples @repo, "text/turtle", File.read(skos)
 
-    query = <<-EOS
-PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX led:<http://data.uba.de/led/>
-
-SELECT DISTINCT ?root ?parent ?concept WHERE {
-    ?root skos:narrowerTransitive ?concept .
-    ?concept skos:broader ?parent .
-    FILTER NOT EXISTS { ?root skos:broader ?superroot }
-}
+    concepts, obs_count, hierarchy = @db.determine_concepts(["#{@led}location"],
+        {}, true, true)
+    assert_equal obs_count, 4
+    assert_equal concepts, {
+      "#{@led}location" => {
+        "#{@led}berlin" => { "de" => "Berlin" },
+        "#{@led}hamburg" => { "de" => "Hamburg" },
+        "#{@led}munich" => { "de" => "München" }
+      }
+    }
+    assert_equal hierarchy, YAML.load(<<-EOS)
+#{@led}germany:
+  #{@led}berlin: {}
+  #{@led}hamburg: {}
+  #{@led}munich: {}
     EOS
-    res = @db.sparql(query, true)["results"]["bindings"]
-
-    root_concepts = res.map { |r| r["root"]["value"] }.uniq
-    descendants = res.map { |r| r["concept"]["value"] }.sort
-    assert_equal root_concepts, ["#{@led}brd"]
-    assert_equal descendants, ["#{@led}nrw", "#{@led}sl", "#{@led}cologne",
-        "#{@led}saarbruecken"].sort
-
-    data = res.map do |result|
-      ["root", "parent", "concept"].map { |key| result[key]["value"] }
-    end
-    expected = YAML.load <<-EOS
-#{@led}brd:
-  #{@led}nrw:
-    #{@led}cologne: {}
-  #{@led}sl:
-    #{@led}saarbruecken: {}
-    EOS
-    assert_equal LEDQuery::Database.resolve_hierarchy(data), expected
   end
 
   def test_inferences
