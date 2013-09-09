@@ -98,7 +98,7 @@ WHERE {
   # returns a hash of concepts by type - concepts are URI/labels pairs, with
   # labels indexed by language
   def determine_concepts(dimensions, concepts_by_dimension={},
-      include_observations_count=false) # TODO: refactor, improve API
+      include_observations_count=false, include_hierarchy=false) # TODO: refactor, improve API
     make_query = lambda do |variables, conditions|
       query = <<-EOS.strip
 PREFIX dct:<http://purl.org/dc/terms/>
@@ -110,7 +110,7 @@ SELECT #{variables} WHERE {
 }
       EOS
       log :info, "querying concepts"
-      return sparql(query)
+      return sparql(query, include_hierarchy)
     end
     unionize = lambda do |arr|
       return arr.length == 1 ? arr[0] : "\n{\n#{arr.join("\n} UNION {\n")}\n}\n"
@@ -130,7 +130,20 @@ SELECT #{variables} WHERE {
     conditions = unionize.call(conditions)
     conditions = ([conditions] + pre_existing_conditions).join("\n")
 
-    res = make_query.call("DISTINCT ?type ?concept ?label", conditions)
+    query_variables = ["?type", "?concept", "?label"]
+    query_conditions = conditions.clone
+    if include_hierarchy
+      query_variables += ["?root", "?parent"] if include_hierarchy
+      query_conditions += <<-EOS.strip
+    OPTIONAL {
+      ?root skos:narrowerTransitive ?concept .
+      ?concept skos:broader ?parent .
+      FILTER NOT EXISTS { ?root skos:broader ?superroot }
+    }
+      EOS
+    end
+    query_variables = "DISTINCT #{query_variables.join(" ")}"
+    res = make_query.call(query_variables, query_conditions)
     concepts_by_type = res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       type = result["type"]["value"]
       concept = result["concept"]["value"]
@@ -258,12 +271,19 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
       end
     end
 
-    while hierarchy["_unresolved"].length > 0 # XXX: crude
-      hierarchy["_unresolved"].each do |concept, parent|
+    unresolved = hierarchy["_unresolved"]
+    prev_count = nil
+    while unresolved.length > 0 # XXX: crude
+      if unresolved.length == prev_count
+        raise(RuntimeError, "unprocessable hierarchy entries")
+      end
+      prev_count = unresolved.length
+
+      unresolved.each do |concept, parent|
         structure = hierarchy["_index"][parent]
         if structure
           register.call(structure, concept)
-          hierarchy["_unresolved"].delete(concept)
+          unresolved.delete(concept)
         end
       end
     end
