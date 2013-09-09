@@ -1,6 +1,51 @@
 require File.expand_path("../test_helper.rb", __FILE__)
+require 'yaml'
 
 class HierarchyTest < DefaultTest
+
+  def test_resolve_hierarchy
+    data = [
+      ["brd", "brd", "nrw"],
+      ["brd", "brd", "sl"],
+      ["brd", "brd", "rp"],
+      ["brd", "nrw", "cologne"],
+      ["brd", "sl", "saarbruecken"],
+      ["brd", "cologne", "portz"],
+      # reversed order
+      ["brd", "by", "munich"],
+      ["brd", "brd", "by"],
+      # arbitrary depth
+      ["root", "dos", "lorem"],
+      ["root", "bravo", "uno"],
+      ["root", "bravo", "dos"],
+      ["root", "bar", "alpha"],
+      ["root", "bar", "bravo"],
+      ["root", "root", "foo"],
+      ["root", "root", "bar"],
+      ["root", "dos", "ipsum"]
+    ]
+    expected = YAML.load <<-EOS
+brd:
+  nrw:
+    cologne:
+      portz: {}
+  rp: {}
+  sl:
+    saarbruecken: {}
+  by:
+    munich: {}
+root:
+  foo: {}
+  bar:
+    alpha: {}
+    bravo:
+      uno: {}
+      dos:
+        lorem: {}
+        ipsum: {}
+    EOS
+    assert_equal LEDQuery::Database.resolve_hierarchy(data), expected
+  end
 
   def test_inferences
     rdf = <<-EOS.strip

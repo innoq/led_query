@@ -241,4 +241,36 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     @logger.send(level, msg) if @logger
   end
 
+  # turns a list of root/parent/concept tuples into a nested hash
+  def self.resolve_hierarchy(entries)
+    hierarchy = { "_index" => {}, "_unresolved" => {} }
+    register = lambda do |obj, key|
+      obj[key] = {}
+      hierarchy["_index"][key] = obj[key]
+    end
+
+    entries.each do |root, parent, concept|
+      hierarchy[root] ||= {}
+      if parent == root
+        register.call(hierarchy[root], concept)
+      else
+        hierarchy["_unresolved"][concept] = parent
+      end
+    end
+
+    while hierarchy["_unresolved"].length > 0 # XXX: crude
+      hierarchy["_unresolved"].each do |concept, parent|
+        structure = hierarchy["_index"][parent]
+        if structure
+          register.call(structure, concept)
+          hierarchy["_unresolved"].delete(concept)
+        end
+      end
+    end
+    hierarchy.delete("_index")
+    hierarchy.delete("_unresolved")
+
+    return hierarchy
+  end
+
 end
