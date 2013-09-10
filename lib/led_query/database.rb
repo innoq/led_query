@@ -133,12 +133,12 @@ SELECT #{variables} WHERE {
     query_variables = ["?type", "?concept", "?label"]
     query_conditions = conditions.clone
     if include_hierarchy
-      query_variables += ["?root", "?parent"] if include_hierarchy
-      query_conditions += <<-EOS.strip
+      query_variables += ["?grancestor", "?ancestor", "?parent"]
+      query_conditions += "\n" + <<-EOS.rstrip
     OPTIONAL {
-      ?root skos:narrowerTransitive ?concept .
-      ?concept skos:broader ?parent .
-      FILTER NOT EXISTS { ?root skos:broader ?superroot }
+        ?parent skos:narrower ?concept .
+        ?ancestor skos:narrowerTransitive ?concept .
+        OPTIONAL { ?grancestor skos:narrower ?ancestor }
     }
       EOS
     end
@@ -155,9 +155,8 @@ SELECT #{variables} WHERE {
       end
       if include_hierarchy
         memo["_hierarchy"] ||= []
-        memo["_hierarchy"] << ["root", "parent", "concept"].map do |key|
-           result[key]["value"]
-        end
+        memo["_hierarchy"] << ["grancestor", "ancestor", "parent", "concept"].
+            map { |key| result[key]["value"] rescue nil }
       end
       memo
     end
@@ -263,42 +262,25 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     @logger.send(level, msg) if @logger
   end
 
-  # turns a list of root/parent/concept tuples into a nested hash
-  def self.resolve_hierarchy(entries)
-    hierarchy = { "_index" => {}, "_unresolved" => {} }
-    register = lambda do |obj, key|
-      obj[key] = {}
-      hierarchy["_index"][key] = obj[key]
+  # turns a list of grancestor/ancestor/parent/concept tuples into a nested hash
+  # (grancestor is the respective ancestor's parent)
+  def self.resolve_hierarchy(entries) # TODO: use TSort?
+    hierarchy = { "_index" => {} }
+    register = lambda do |id|
+      return hierarchy["_index"][id] ||= {}
     end
 
-    entries.each do |root, parent, concept|
-      hierarchy[root] ||= {}
-      if parent == root
-        register.call(hierarchy[root], concept)
-      else
-        hierarchy["_unresolved"][concept] = parent
-      end
+    entries.each do |grancestor, ancestor, parent, concept|
+      concept_node = register.call(concept)
+      parent_node = register.call(parent)
+      ancestor_node = register.call(ancestor)
+      root = grancestor.nil? ? hierarchy : register.call(grancestor)
+
+      parent_node[concept] ||= concept_node
+      root[ancestor] ||= ancestor_node
     end
 
-    unresolved = hierarchy["_unresolved"]
-    prev_count = nil
-    while unresolved.length > 0 # XXX: crude
-      if unresolved.length == prev_count
-        raise(RuntimeError, "unprocessable hierarchy entries")
-      end
-      prev_count = unresolved.length
-
-      unresolved.each do |concept, parent|
-        structure = hierarchy["_index"][parent]
-        if structure
-          register.call(structure, concept)
-          unresolved.delete(concept)
-        end
-      end
-    end
     hierarchy.delete("_index")
-    hierarchy.delete("_unresolved")
-
     return hierarchy
   end
 

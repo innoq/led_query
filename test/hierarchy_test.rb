@@ -4,54 +4,89 @@ require 'yaml'
 class HierarchyTest < DefaultTest
 
   def test_resolve_hierarchy
-    data = [
-      ["brd", "brd", "nrw"],
-      ["brd", "brd", "sl"],
-      ["brd", "brd", "rp"],
-      ["brd", "nrw", "cologne"],
-      ["brd", "sl", "saarbruecken"],
-      ["brd", "cologne", "portz"],
-      # reversed order
-      ["brd", "by", "munich"],
-      ["brd", "brd", "by"],
-      # arbitrary depth
-      ["root", "dos", "lorem"],
-      ["root", "bravo", "uno"],
-      ["root", "bravo", "dos"],
-      ["root", "bar", "alpha"],
-      ["root", "bar", "bravo"],
-      ["root", "root", "foo"],
-      ["root", "root", "bar"],
-      ["root", "dos", "ipsum"]
-    ]
+    skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
+    @store.add_triples @repo, "text/turtle", File.read(skos)
+
+    @store.add_triples @repo, "text/turtle", <<-EOS.strip
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix : <http://data.uba.de/led/> .
+
+:root a skos:Concept.
+:foo a skos:Concept;
+    skos:broader :root.
+:bar a skos:Concept;
+    skos:broader :root.
+:alpha a skos:Concept;
+    skos:broader :bar.
+:bravo a skos:Concept;
+    skos:broader :bar.
+:uno a skos:Concept;
+    skos:broader :bravo.
+:dos a skos:Concept;
+    skos:broader :bravo.
+:lorem a skos:Concept;
+    skos:broader :dos.
+:ipsum a skos:Concept;
+    skos:broader :dos.
+
+:o1 a qb:Observation;
+    :location :alpha.
+:o2 a qb:Observation;
+    :location :lorem.
+    EOS
+
+    query = <<-EOS
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX qb:<http://purl.org/linked-data/cube#>
+PREFIX led:<http://data.uba.de/led/>
+
+SELECT DISTINCT ?grancestor ?ancestor ?parent ?concept WHERE {
+    ?obs a qb:Observation .
+    ?obs led:location ?concept .
+    OPTIONAL {
+        ?parent skos:narrower ?concept .
+        ?ancestor skos:narrowerTransitive ?concept .
+        OPTIONAL { ?grancestor skos:narrower ?ancestor }
+    }
+}
+    EOS
+    res = @db.sparql(query, true)
+    data = res["results"]["bindings"].map do |result|
+      ["grancestor", "ancestor", "parent", "concept"].map do |var|
+        result[var]["value"].sub(@led, "") rescue nil
+      end
+    end
+    assert_equal data.to_set, [
+      ["root", "bar", "bar", "alpha"],
+      [nil, "root", "bar", "alpha"],
+      ["bravo", "dos", "dos", "lorem"],
+      ["bar", "bravo", "dos", "lorem"],
+      ["root", "bar", "dos", "lorem"],
+      [nil, "root", "dos", "lorem"]
+    ].to_set
+
     expected = YAML.load <<-EOS
-brd:
-  nrw:
-    cologne:
-      portz: {}
-  rp: {}
-  sl:
-    saarbruecken: {}
-  by:
-    munich: {}
 root:
-  foo: {}
   bar:
     alpha: {}
     bravo:
-      uno: {}
       dos:
         lorem: {}
-        ipsum: {}
     EOS
-    assert_equal LEDQuery::Database.resolve_hierarchy(data), expected
+    assert_equal expected, LEDQuery::Database.resolve_hierarchy(data)
 
     data = [
-      ["de", "de", "berlin"],
-      ["de", "de", "hamburg"],
-      ["de", "sl", "saarbruecken"] # unprocessable due to missing entry for "sl"
+      [nil, "de", "de", "berlin"],
+      [nil, "de", "de", "hamburg"],
+      [nil, "de", "sl", "saarbruecken"] # unprocessable due to missing entry for "sl"
     ]
-    assert_raises(RuntimeError) { LEDQuery::Database.resolve_hierarchy(data) }
+    expected = YAML.load <<-EOS
+de:
+  berlin: {}
+  hamburg: {}
+    EOS
+    assert_equal expected, LEDQuery::Database.resolve_hierarchy(data)
   end
 
   def test_concept_hierarchy
@@ -66,8 +101,12 @@ led:hamburg a skos:Concept;
     skos:prefLabel "Hamburg"@de.
 led:munich a skos:Concept;
     skos:inScheme led:locationScheme;
-    skos:broader led:germany;
+    skos:broader led:bavaria;
     skos:prefLabel "München"@de.
+led:bavaria a skos:Concept;
+    skos:inScheme led:locationScheme;
+    skos:broader led:germany;
+    skos:prefLabel "Bayern"@de.
 led:germany a skos:Concept;
     skos:inScheme led:locationScheme;
     skos:prefLabel "Bundesrepublik Deutschland"@de.
@@ -110,7 +149,8 @@ led:obs789 a qb:Observation;
 #{@led}germany:
   #{@led}berlin: {}
   #{@led}hamburg: {}
-  #{@led}munich: {}
+  #{@led}bavaria:
+    #{@led}munich: {}
     EOS
   end
 
