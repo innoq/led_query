@@ -4,7 +4,8 @@ require 'yaml'
 class HierarchyTest < DefaultTest
 
   def test_concept_hierarchy
-    rdf = File.read(@common) + <<-EOS
+    prefixes = "@prefix dct: <http://purl.org/dc/terms/>."
+    rdf = prefixes + File.read(@common) + <<-EOS.strip
 led:berlin a skos:Concept;
     skos:inScheme led:locationScheme;
     skos:broader led:germany;
@@ -33,17 +34,28 @@ led:phosphorus a skos:Concept;
     skos:prefLabel "Phosphor"@de.
 
 led:obs123 a qb:Observation;
+    led:source led:places;
     led:analyte led:ammonium;
-    led:location led:berlin.
+    led:location led:berlin;
+    led:temporal [ dct:start 2000; dct:end 2000 ].
 led:obs321 a qb:Observation;
+    led:source led:places;
     led:analyte led:ammonium;
-    led:location led:berlin.
+    led:location led:berlin;
+    led:temporal [ dct:start 2000; dct:end 2000 ].
 led:obs456 a qb:Observation;
+    led:source led:places;
     led:analyte led:phosphorus;
-    led:location led:hamburg.
+    led:location led:hamburg;
+    led:temporal [ dct:start 2000; dct:end 2000 ].
 led:obs789 a qb:Observation;
+    led:source led:places;
     led:analyte led:phosphorus;
-    led:location led:munich.
+    led:location led:munich;
+    led:temporal [ dct:start 2000; dct:end 2000 ].
+
+led:places a qb:DataSet, skos:Concept;
+    skos:inScheme led:sourceScheme.
     EOS
     @store.add_triples @repo, "text/turtle", rdf
     skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
@@ -68,6 +80,21 @@ led:obs789 a qb:Observation;
   #{@led}bavaria:
     #{@led}munich: {}
     EOS
+
+    selected_concepts = { "#{@led}location" => ["#{@led}germany"] }
+
+    count = @db.observations_count(selected_concepts)
+    observations = @db.determine_observations(selected_concepts)
+    assert_equal count, 0
+    assert_equal observations.length, count
+
+    count = @db.observations_count(selected_concepts, true)
+    observations = @db.determine_observations(selected_concepts, true)
+    assert_equal count, 4
+    assert_equal observations.length, count
+    results = observations.map { |obs| obs["obs"] }
+    assert_equal results.to_set, ["#{@led}obs123", "#{@led}obs321",
+        "#{@led}obs456", "#{@led}obs789"].to_set
   end
 
   def test_resolve_hierarchy

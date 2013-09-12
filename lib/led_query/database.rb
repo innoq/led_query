@@ -33,11 +33,11 @@ class LEDQuery::Database
   # determine observations for the given concepts and from the given sources
   # (all URIs)
   # returns a list of hashes representing individual observations
-  def determine_observations(concepts_by_dimension)
+  def determine_observations(concepts_by_dimension, include_descendants=false)
     conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
         map do |(dim, concepts), i|
       concepts = resource_list(concepts)
-      [dimension_query(dim, i), "FILTER(?concept#{i} IN (#{concepts}))"].
+      [dimension_query(dim, i, include_descendants), "FILTER(?concept#{i} IN (#{concepts}))"].
           join("\n    ")
     end.join("\n")
 
@@ -70,7 +70,7 @@ WHERE {
     EOS
 
     log :info, "querying observations"
-    res = sparql(query)
+    res = sparql(query, include_descendants)
     return res["results"]["bindings"].map do |result| # TODO: error handling
       analyte_label = result["albl"]["value"] rescue nil
       location_label = result["llbl"]["value"] rescue nil
@@ -196,12 +196,12 @@ SELECT DISTINCT ?dim ?label WHERE {
     return determine_labeled_resources(query, "dim")
   end
 
-  def observations_count(concepts_by_dimension={})
+  def observations_count(concepts_by_dimension={}, include_descendants=false)
     conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
         map do |(dim, concepts), i|
       concepts = resource_list(concepts)
-      [dimension_query(dim, i), "FILTER(?concept#{i} IN (#{concepts}))"].
-          join("\n    ")
+      [dimension_query(dim, i, include_descendants),
+          "FILTER(?concept#{i} IN (#{concepts}))"].join("\n    ")
     end.join("\n")
 
     query = <<-EOS.strip
@@ -216,7 +216,7 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     EOS
 
     log :info, "querying observations count"
-    res = sparql(query)
+    res = sparql(query, include_descendants)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
   end
 
@@ -235,19 +235,29 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
   end
 
   # `var` is used as suffix to create pseudo-local variables
-  def dimension_query(dim, var=nil) # TODO: rename
+  def dimension_query(dim, var=nil, include_descendants=false) # TODO: rename
     if dim == "http://data.uba.de/led/temporal" # XXX: special-casing
-      return <<-EOS.rstrip
-      ?obs <#{dim}> ?time#{var} .
-      ?time#{var} dct:start ?concept#{var} .
-      ?obs a qb:Observation .
+      statements = <<-EOS.rstrip
+    ?obs <#{dim}> ?time#{var} .
+    ?time#{var} dct:start ?concept#{var} .
+    ?obs a qb:Observation .
+      EOS
+    elsif include_descendants
+      statements = <<-EOS.rstrip
+    {
+        ?obs <#{dim}> ?concept#{var} .
+    } UNION {
+        ?obs <#{dim}> ?subConcept#{var} .
+        ?concept#{var} skos:narrowerTransitive ?subConcept#{var} .
+    }
+    ?obs a qb:Observation .
+      EOS
+    else
+      statements = <<-EOS.rstrip
+    ?obs <#{dim}> ?concept#{var} .
       EOS
     end
-
-    return <<-EOS.rstrip
-    ?obs <#{dim}> ?concept#{var} .
-    ?obs a qb:Observation .
-    EOS
+    return "#{statements}\n?obs a qb:Observation ."
   end
 
   def resource_list(concepts)
