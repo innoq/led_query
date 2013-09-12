@@ -112,6 +112,13 @@ SELECT #{variables} WHERE {
       log :info, "querying concepts"
       return sparql(query, include_hierarchy)
     end
+    register_label = lambda do |hash, concept, label, always=false|
+      hash[concept] ||= {} if label || always
+      if label
+        lang = label["xml:lang"]
+        hash[concept][lang] = label["value"]
+      end
+    end
     unionize = lambda do |arr|
       return arr.length == 1 ? arr[0] : "\n{\n#{arr.join("\n} UNION {\n")}\n}\n"
     end
@@ -133,12 +140,13 @@ SELECT #{variables} WHERE {
     query_variables = ["?type", "?concept", "?label"]
     query_conditions = conditions.clone
     if include_hierarchy
-      query_variables += ["?grancestor", "?ancestor", "?parent"]
+      query_variables += ["?grancestor", "?ancestor", "?parent", "?ancLabel"]
       query_conditions += "\n" + <<-EOS.rstrip
     OPTIONAL {
         ?parent skos:narrower ?concept .
         ?ancestor skos:narrowerTransitive ?concept .
         OPTIONAL { ?grancestor skos:narrower ?ancestor }
+        OPTIONAL { ?ancestor skos:prefLabel ?ancLabel }
     }
       EOS
     end
@@ -148,12 +156,11 @@ SELECT #{variables} WHERE {
       type = result["type"]["value"]
       concept = result["concept"]["value"]
       memo[type] ||= {}
-      memo[type][concept] = {}
-      if label = result["label"]
-        lang = label["xml:lang"]
-        memo[type][concept][lang] = label["value"]
-      end
+      register_label.call(memo[type], concept, result["label"], true)
       if include_hierarchy
+        if ancestor = result["ancestor"]
+          register_label.call(memo[type], ancestor["value"], result["ancLabel"])
+        end
         memo["_hierarchy"] ||= []
         memo["_hierarchy"] << ["grancestor", "ancestor", "parent", "concept"].
             map { |key| result[key]["value"] rescue nil }

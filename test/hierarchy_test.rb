@@ -56,7 +56,9 @@ led:obs789 a qb:Observation;
       "#{@led}location" => {
         "#{@led}berlin" => { "de" => "Berlin" },
         "#{@led}hamburg" => { "de" => "Hamburg" },
-        "#{@led}munich" => { "de" => "München" }
+        "#{@led}munich" => { "de" => "München" },
+        "#{@led}bavaria" => { "de" => "Bayern" },
+        "#{@led}germany" => { "de" => "Bundesrepublik Deutschland" }
       }
     }
     assert_equal hierarchy, YAML.load(<<-EOS)
