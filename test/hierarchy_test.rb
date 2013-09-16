@@ -68,6 +68,22 @@ led:obs789 a qb:Observation;
   #{@led}bavaria:
     #{@led}munich: {}
     EOS
+
+    selected_concepts = { "#{@led}location" => ["#{@led}bavaria"] }
+
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
+        selected_concepts, true, false, false)
+    assert_equal obs_count, 0
+    assert_equal concepts, {}
+
+    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
+        selected_concepts, true, false, true)
+    assert_equal obs_count, 1
+    assert_equal concepts, {
+      "#{@led}analyte" => {
+        "#{@led}phosphorus" => { "de" => "Phosphor" }
+      }
+    }
   end
 
   def test_observations_via_concept_descendants

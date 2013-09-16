@@ -111,7 +111,7 @@ SELECT #{variables} WHERE {
 }
       EOS
       log :info, "querying concepts"
-      return sparql(query, include_hierarchy)
+      return sparql(query, include_hierarchy || include_descendants)
     end
     register_label = lambda do |hash, concept, label, always=false|
       hash[concept] ||= {} if label || always
