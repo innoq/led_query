@@ -240,7 +240,6 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
       statements = <<-EOS.rstrip
     ?obs <#{dim}> ?time#{var} .
     ?time#{var} dct:start ?concept#{var} .
-    ?obs a qb:Observation .
       EOS
     elsif include_descendants
       statements = <<-EOS.rstrip
@@ -250,14 +249,13 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
         ?obs <#{dim}> ?subConcept#{var} .
         ?concept#{var} skos:narrowerTransitive ?subConcept#{var} .
     }
-    ?obs a qb:Observation .
       EOS
     else
       statements = <<-EOS.rstrip
     ?obs <#{dim}> ?concept#{var} .
       EOS
     end
-    return "#{statements}\n?obs a qb:Observation ."
+    return "#{statements}\n    ?obs a qb:Observation ."
   end
 
   def resource_list(concepts)
