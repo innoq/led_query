@@ -98,7 +98,8 @@ WHERE {
   # returns a hash of concepts by type - concepts are URI/labels pairs, with
   # labels indexed by language
   def determine_concepts(dimensions, concepts_by_dimension={},
-      include_observations_count=false, include_hierarchy=false) # TODO: refactor, improve API
+      include_observations_count=false, include_hierarchy=false,
+      include_descendants=false) # TODO: refactor, improve API
     make_query = lambda do |variables, conditions|
       query = <<-EOS.strip
 PREFIX dct:<http://purl.org/dc/terms/>
@@ -126,12 +127,13 @@ SELECT #{variables} WHERE {
     pre_existing_conditions = concepts_by_dimension.each_with_index.
         map do |(dim, concepts), i|
       concepts = resource_list(concepts)
-      [dimension_query(dim, i), "FILTER(?concept#{i} IN (#{concepts}))"].
-          join("\n    ")
+      [dimension_query(dim, i, include_descendants),
+          "FILTER(?concept#{i} IN (#{concepts}))"].join("\n    ")
     end
 
     conditions = dimensions.map do |dim|
-      [dimension_query(dim), "BIND (<#{dim}> AS ?type)",
+      [dimension_query(dim, nil, include_descendants),
+          "BIND (<#{dim}> AS ?type)",
           "OPTIONAL { ?concept skos:prefLabel ?label }"].join("\n    ")
     end
     conditions = unionize.call(conditions)
