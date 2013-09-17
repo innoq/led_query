@@ -245,12 +245,8 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
       EOS
     elsif include_descendants
       statements = <<-EOS.rstrip
-    {
-        ?obs <#{dim}> ?concept#{var} .
-    } UNION {
-        ?obs <#{dim}> ?subConcept#{var} .
-        ?concept#{var} skos:narrowerTransitive ?subConcept#{var} .
-    }
+    ?obs <#{dim}> ?subConcept#{var} .
+    ?concept#{var} skos:narrower* ?subConcept#{var} .
       EOS
     else
       statements = <<-EOS.rstrip
