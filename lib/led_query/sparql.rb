@@ -8,7 +8,8 @@ module LEDQuery::SPARQL
   def self.query(endpoint, query, infer=false, logger=nil)
     params = { "query" => query }
     params[:infer] = false unless infer
-    logger.debug "==== SPARQL\n#{query}\n----" if logger
+    logger.debug ["==== SPARQL (infer: #{infer})", endpoint, "", query, "----"].
+        join("\n") if logger
     res = http_request("POST", endpoint, params,
         { "Accept" => "application/sparql-results+json" })
     return res.code == "200" ? JSON.load(res.body) : res
