@@ -234,16 +234,12 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
     return LEDQuery::SPARQL.query(@triplestore, query, infer, @logger)
   end
 
-  # NB: templating only occurs if `data` is not `nil`
   def make_query(template, data=nil)
     templates_dir = File.expand_path(File.join("..", "templates"), __FILE__)
-    render = lambda do |template, data=nil| # required for partials -- XXX: hacky!
-      templating = data.length > 1
-      ext = templating ? "sparql.erb" : "sparql"
-      path = File.join(templates_dir, "#{template}.#{ext}")
+    render = lambda do |template, data| # required for partials -- XXX: hacky!
+      path = File.join(templates_dir, "#{template}.sparql.erb")
       res = File.read(path)
-      res = Erubis::Eruby.new(res).result(data) if templating
-      return res
+      return Erubis::Eruby.new(res).result(data)
     end
     data ||= {}
     data["render"] = render
