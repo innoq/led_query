@@ -1,0 +1,8 @@
+<% concepts_by_dimension.each_with_index do |(dim, concepts), i| %>
+    <%= render.call "_dimension_query", {
+        :dimension => "<#{dim}>",
+        :include_descendants => include_descendants,
+        :var => i
+    } %>
+    FILTER(?concept<%= i %> IN (<%= concepts %>))
+<% end %>

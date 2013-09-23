@@ -162,24 +162,14 @@ SELECT #{variables} WHERE {
   end
 
   def observations_count(concepts_by_dimension={}, include_descendants=false)
-    conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
-        map do |(dim, concepts), i|
-      concepts = resource_list(concepts)
-      [dimension_query(dim, i, include_descendants),
-          "FILTER(?concept#{i} IN (#{concepts}))"].join("\n    ")
-    end.join("\n")
-
-    query = <<-EOS.strip
-PREFIX dct:<http://purl.org/dc/terms/>
-PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX qb:<http://purl.org/linked-data/cube#>
-
-SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
-#{conditions}
-    ?obs a qb:Observation .
-}
-    EOS
-
+    query = make_query("determine_observations_count", { # XXX: largely duplicates `determine_observations`
+      :include_descendants => include_descendants,
+      :concepts_by_dimension => concepts_by_dimension.
+          inject({}) do |memo, (dim, concepts)|
+        memo[dim] = resource_list(concepts)
+        memo
+      end
+    })
     log :info, "querying observations count"
     res = sparql(query, include_descendants)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
