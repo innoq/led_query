@@ -155,10 +155,20 @@ SELECT #{variables} WHERE {
     return ret.length == 1 ? ret[0] : ret
   end
 
+  # returns a hash of URI/labels pairs, with labels indexed by language
   def determine_dimensions
     query = make_query("determine_dimensions")
     log :info, "querying dimensions"
-    return determine_labeled_resources(query, "dim")
+    res = sparql(query)
+    return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
+      id = result["dim"]["value"]
+      memo[id] ||= {}
+      if label = result["label"]
+        lang = label["xml:lang"]
+        memo[id][lang] = label["value"]
+      end
+      memo
+    end
   end
 
   def observations_count(concepts_by_dimension={}, include_descendants=false)
@@ -173,20 +183,6 @@ SELECT #{variables} WHERE {
     log :info, "querying observations count"
     res = sparql(query, include_descendants)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
-  end
-
-  # returns a hash of URI/labels pairs, with labels indexed by language
-  def determine_labeled_resources(query, binding) # TODO: rename
-    res = sparql(query)
-    return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
-      id = result[binding]["value"]
-      memo[id] ||= {}
-      if label = result["label"]
-        lang = label["xml:lang"]
-        memo[id][lang] = label["value"]
-      end
-      memo
-    end
   end
 
   # `var` is used as suffix to create pseudo-local variables
