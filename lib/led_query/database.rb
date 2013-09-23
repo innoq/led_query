@@ -1,3 +1,4 @@
+require "erubis"
 require "led_query"
 require "led_query/sparql"
 
@@ -183,17 +184,7 @@ SELECT #{variables} WHERE {
   end
 
   def determine_dimensions
-    query = <<-EOS.strip
-PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX qb:<http://purl.org/linked-data/cube#>
-
-SELECT DISTINCT ?dim ?label WHERE {
-    ?dim a qb:DimensionProperty .
-    OPTIONAL {
-        ?dim skos:prefLabel ?label
-    }
-}
-    EOS
+    query = make_query("determine_dimensions")
     log :info, "querying dimensions"
     return determine_labeled_resources(query, "dim")
   end
@@ -269,6 +260,16 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
 
   def sparql(query, infer=false)
     return LEDQuery::SPARQL.query(@triplestore, query, infer, @logger)
+  end
+
+  # NB: templating only occurs if `data` is not `nil`
+  def make_query(template, data=nil)
+    ext = data ? "sparql.erb" : "sparql"
+    filename = "#{template}.#{ext}"
+    path = File.expand_path(File.join("..", "templates", filename), __FILE__)
+    query = File.read(path)
+    query = Erubis::Eruby.new(query).result(data) if data
+    return query
   end
 
   def log(level, msg)

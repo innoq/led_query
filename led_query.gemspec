@@ -18,6 +18,8 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- test/*.rb`.split("\n")
   s.require_paths = ["lib"]
 
+  s.add_dependency "erubis"
+
   s.add_development_dependency "rake"
   s.add_development_dependency "minitest"
   s.add_development_dependency "rest-client"
