@@ -1,0 +1,32 @@
+PREFIX dct:<http://purl.org/dc/terms/>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX qb:<http://purl.org/linked-data/cube#>
+PREFIX led:<http://data.uba.de/led/>
+
+SELECT DISTINCT
+    ?obs ?mean ?uom ?title ?desc ?analyte ?location ?startTime ?endTime ?dataset
+    ?albl ?llbl ?dlbl
+WHERE {
+    <% concepts_by_dimension.each_with_index do |(dim, concepts), i| %>
+      <%= render.call "_dimension_query", {
+        :dimension => "<#{dim}>",
+        :include_descendants => include_descendants,
+        :var => i
+      } %>
+    FILTER(?concept<%= i %> IN (<%= concepts %>))
+    <% end %>
+    ?obs led:analyte ?analyte .
+    ?obs led:location ?location .
+    ?obs led:source ?dataset .
+    ?obs a qb:Observation .
+    OPTIONAL { ?obs led:mean ?mean } .
+    OPTIONAL { ?obs led:uom ?uom } .
+    OPTIONAL { ?obs dct:title ?title } .
+    OPTIONAL { ?obs dct:description ?desc } .
+    ?obs led:temporal ?time .
+    ?time dct:start ?startTime .
+    ?time dct:end ?endTime .
+    OPTIONAL { ?analyte skos:prefLabel ?albl . }
+    OPTIONAL { ?location skos:prefLabel ?llbl . }
+    OPTIONAL { ?dataset skos:prefLabel ?dlbl . }
+}

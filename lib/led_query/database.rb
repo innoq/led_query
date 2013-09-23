@@ -35,48 +35,20 @@ class LEDQuery::Database
   # (all URIs)
   # returns a list of hashes representing individual observations
   def determine_observations(concepts_by_dimension, include_descendants=false)
-    conditions = concepts_by_dimension.each_with_index. # XXX: largely duplicates `determine_concepts`
-        map do |(dim, concepts), i|
-      concepts = resource_list(concepts)
-      [dimension_query(dim, i, include_descendants), "FILTER(?concept#{i} IN (#{concepts}))"].
-          join("\n    ")
-    end.join("\n")
-
-    query = <<-EOS.strip
-PREFIX dct:<http://purl.org/dc/terms/>
-PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX qb:<http://purl.org/linked-data/cube#>
-PREFIX led:<http://data.uba.de/led/>
-
-SELECT DISTINCT
-    ?obs ?mean ?uom ?title ?desc ?analyte ?location ?startTime ?endTime ?dataset
-    ?albl ?llbl ?dlbl
-WHERE {
-#{conditions}
-    ?obs led:analyte ?analyte .
-    ?obs led:location ?location .
-    ?obs led:source ?dataset .
-    ?obs a qb:Observation .
-    OPTIONAL { ?obs led:mean ?mean } .
-    OPTIONAL { ?obs led:uom ?uom } .
-    OPTIONAL { ?obs dct:title ?title } .
-    OPTIONAL { ?obs dct:description ?desc } .
-    ?obs led:temporal ?time .
-    ?time dct:start ?startTime .
-    ?time dct:end ?endTime .
-    OPTIONAL { ?analyte skos:prefLabel ?albl . }
-    OPTIONAL { ?location skos:prefLabel ?llbl . }
-    OPTIONAL { ?dataset skos:prefLabel ?dlbl . }
-}
-    EOS
-
+    query = make_query("determine_observations", {
+      :include_descendants => include_descendants,
+      :concepts_by_dimension => concepts_by_dimension.
+          inject({}) do |memo, (dim, concepts)|
+        memo[dim] = resource_list(concepts)
+        memo
+      end
+    })
     log :info, "querying observations"
     res = sparql(query, include_descendants)
     return res["results"]["bindings"].map do |result| # TODO: error handling
       analyte_label = result["albl"]["value"] rescue nil
       location_label = result["llbl"]["value"] rescue nil
       source_label = result["dlbl"]["value"] rescue nil
-
       {
         "obs" => result["obs"]["value"],
         # XXX: hard-coding data types for now
@@ -264,12 +236,18 @@ SELECT (COUNT(DISTINCT ?obs) AS ?obsCount) WHERE {
 
   # NB: templating only occurs if `data` is not `nil`
   def make_query(template, data=nil)
-    ext = data ? "sparql.erb" : "sparql"
-    filename = "#{template}.#{ext}"
-    path = File.expand_path(File.join("..", "templates", filename), __FILE__)
-    query = File.read(path)
-    query = Erubis::Eruby.new(query).result(data) if data
-    return query
+    templates_dir = File.expand_path(File.join("..", "templates"), __FILE__)
+    render = lambda do |template, data=nil| # required for partials -- XXX: hacky!
+      templating = data.length > 1
+      ext = templating ? "sparql.erb" : "sparql"
+      path = File.join(templates_dir, "#{template}.#{ext}")
+      res = File.read(path)
+      res = Erubis::Eruby.new(res).result(data) if templating
+      return res
+    end
+    data ||= {}
+    data["render"] = render
+    return render.call(template, data)
   end
 
   def log(level, msg)

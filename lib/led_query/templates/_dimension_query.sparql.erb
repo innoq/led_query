@@ -1,0 +1,12 @@
+<%# `var` is used as suffix to create pseudo-local variables %>
+
+<% if dimension == "<http://data.uba.de/led/temporal>" %> <%# XXX: special-casing %>
+    ?obs <%= dimension %> ?time<%= var %> .
+    ?time<%= var %> dct:start ?concept<%= var %> .
+<% elsif include_descendants %>
+    ?obs <%= dimension %> ?subConcept<%= var %> .
+    ?concept<%= var %> skos:narrower* ?subConcept<%= var %> .
+<% else %>
+    ?obs <%= dimension %> ?concept<%= var %> .
+<% end %>
+    ?obs a qb:Observation .
