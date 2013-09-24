@@ -1,0 +1,26 @@
+PREFIX dct:<http://purl.org/dc/terms/>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX qb:<http://purl.org/linked-data/cube#>
+
+SELECT DISTINCT <%= bindings.join(" ") %> WHERE {
+    <%= render.call "_dimension_query", {
+            :dimension => dimension,
+            :include_descendants => include_descendants,
+            :var => nil
+    } %>
+    BIND (<%= dimension %> AS ?type)
+    OPTIONAL { ?concept skos:prefLabel ?label }
+
+    <%= render.call("_concepts_query", :render => render,
+            :concepts_by_dimension => pre_existing_conditions,
+            :include_descendants => include_descendants) %>
+
+    <% if include_hierarchy %>
+    OPTIONAL {
+        ?parent skos:narrower ?concept .
+        ?ancestor skos:narrowerTransitive ?concept .
+        OPTIONAL { ?grancestor skos:narrower ?ancestor }
+        OPTIONAL { ?ancestor skos:prefLabel ?ancLabel }
+    }
+    <% end %>
+}
