@@ -271,11 +271,17 @@ led:obs789 a qb:Observation;
     led:temporal [ dct:start 2011; dct:end 2011 ];
     led:mean 7.89;
     led:uom "mg/l N".
+led:obs987 a qb:Observation; # NB: no temporal reference
+    led:source led:eea;
+    led:analyte led:ammonium;
+    led:location led:berlin;
+    led:mean 9.87;
+    led:uom "mg/l N".
     EOS
     @store.add_triples @repo, "text/turtle", rdf
 
     count = @db.observations_count
-    assert_equal count, 4
+    assert_equal count, 5
 
     selected_concepts = { "#{@led}temporal" => ["2001"] }
     count = @db.observations_count(selected_concepts)
@@ -305,6 +311,23 @@ led:obs789 a qb:Observation;
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
 #{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+    EOS
+
+    # ensure temporal references are optional
+    selected_concepts = { "#{@led}location" => ["#{@led}berlin"] }
+    count = @db.observations_count(selected_concepts)
+    observations = @db.determine_observations(selected_concepts)
+    assert_equal count, 4
+    assert_equal observations.length, count
+    results = observations.map do |obs|
+      ["obs", "mean", "uom", "time", "location"].
+          map { |key| obs[key].to_s }.join(" | ")
+    end.sort.join("\n")
+    assert_equal results, <<-EOS.strip
+#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Berlin"<#{@led}berlin>
+#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Berlin"<#{@led}berlin>
+#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Berlin"<#{@led}berlin>
+#{@led}obs987 | 9.87 | mg/l N | [nil, nil] | "Berlin"<#{@led}berlin>
     EOS
   end
 

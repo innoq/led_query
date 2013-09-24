@@ -60,7 +60,7 @@ class LEDQuery::Database
         "location" => Link.new(result["location"]["value"], location_label),
         "source" => Link.new(result["dataset"]["value"], source_label),
         "time" => ["startTime", "endTime"].map do |key|
-          Float(result[key]["value"]).to_i
+          Float(result[key]["value"]).to_i rescue nil
         end
       }
     end

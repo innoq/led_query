@@ -18,9 +18,11 @@ WHERE {
     OPTIONAL { ?obs led:uom ?uom } .
     OPTIONAL { ?obs dct:title ?title } .
     OPTIONAL { ?obs dct:description ?desc } .
-    ?obs led:temporal ?time .
-    ?time dct:start ?startTime .
-    ?time dct:end ?endTime .
+    OPTIONAL {
+        ?obs led:temporal ?time .
+        ?time dct:start ?startTime .
+        ?time dct:end ?endTime .
+    }
     OPTIONAL { ?analyte skos:prefLabel ?albl . }
     OPTIONAL { ?location skos:prefLabel ?llbl . }
     OPTIONAL { ?dataset skos:prefLabel ?dlbl . }
