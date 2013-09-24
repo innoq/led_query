@@ -14,7 +14,8 @@ class DatabaseTest < DefaultTest
   end
 
   def test_concepts
-    concepts, obs_count = @db.determine_concepts("#{@led}analyte", {}, true)
+    concepts, obs_count = @db.determine_concepts("#{@led}analyte", {},
+        :include_observations_count => true)
     assert_equal obs_count, 0
     assert_equal concepts, {}
 
@@ -45,7 +46,8 @@ led:obs456 a qb:Observation;
     EOS
     @store.add_triples @repo, "text/turtle", rdf
 
-    concepts, obs_count = @db.determine_concepts("#{@led}analyte", {}, true)
+    concepts, obs_count = @db.determine_concepts("#{@led}analyte", {},
+        :include_observations_count => true)
     assert_equal obs_count, 3
     assert_equal concepts, {
       "#{@led}analyte" => {
@@ -55,7 +57,8 @@ led:obs456 a qb:Observation;
     }
 
     concepts, obs_count = @db.determine_concepts("#{@led}analyte",
-        { "#{@led}location" => ["#{@led}berlin"] }, true)
+        { "#{@led}location" => ["#{@led}berlin"] },
+        :include_observations_count => true)
     assert_equal obs_count, 2
     assert_equal concepts, {
       "#{@led}analyte" => {
@@ -64,7 +67,8 @@ led:obs456 a qb:Observation;
     }
 
     concepts, obs_count = @db.determine_concepts("#{@led}analyte",
-        { "#{@led}location" => ["#{@led}hamburg"] }, true)
+        { "#{@led}location" => ["#{@led}hamburg"] },
+        :include_observations_count => true)
     assert_equal obs_count, 1
     assert_equal concepts, {
       "#{@led}analyte" => {
@@ -73,7 +77,8 @@ led:obs456 a qb:Observation;
     }
 
     concepts, obs_count = @db.determine_concepts("#{@led}analyte",
-        { "#{@led}location" => ["#{@led}berlin", "#{@led}hamburg"] }, true)
+        { "#{@led}location" => ["#{@led}berlin", "#{@led}hamburg"] },
+        :include_observations_count => true)
     assert_equal obs_count, 3
     assert_equal concepts, {
       "#{@led}analyte" => {
@@ -103,7 +108,8 @@ led:obs789 a qb:Observation;
     EOS
 
     concepts, obs_count = @db.determine_concepts("#{@led}analyte",
-        { "#{@led}location" => ["#{@led}berlin"] }, true)
+        { "#{@led}location" => ["#{@led}berlin"] },
+        :include_observations_count => true)
     assert_equal obs_count, 3
     assert_equal concepts, {
       "#{@led}analyte" => {
@@ -115,7 +121,7 @@ led:obs789 a qb:Observation;
     concepts, obs_count = @db.determine_concepts("#{@led}analyte", {
       "#{@led}location" => ["#{@led}berlin"],
       "#{@led}source" => ["#{@led}eea"]
-    }, true)
+    }, :include_observations_count => true)
     assert_equal obs_count, 1
     assert_equal concepts, {
       "#{@led}analyte" => {

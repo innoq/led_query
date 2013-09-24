@@ -70,10 +70,18 @@ class LEDQuery::Database
   # to those co-occurring with the given set of concepts from other dimensions
   # returns a hash of concepts by type - concepts are URI/labels pairs, with
   # labels indexed by language
-  def determine_concepts(dimension, concepts_by_dimension={},
-      include_observations_count=false, include_hierarchy=false,
-      include_descendants=false) # TODO: refactor, improve API
-    infer = include_hierarchy || include_descendants
+  # options (all false by default):
+  # * `:include_observations_count`: adds observation count to return value
+  # * `:include_hierarchy`: adds hierarchy to return value
+  # * `:include_descendants`: consider concepts' descendants when determining
+  #    co-occurrence (e.g. "animal" implicitly includes "cat" and "dog")
+  # * `:infer`: force inferences
+  # note that the return value changes depending on the selected options
+  def determine_concepts(dimension, concepts_by_dimension={}, options={})
+    include_observations_count = options[:include_observations_count] || false
+    include_hierarchy = options[:include_hierarchy] || false
+    include_descendants = options[:include_descendants] || false
+    infer = options[:infer] || include_hierarchy || include_descendants
 
     bindings = ["?type", "?concept", "?label"]
     if include_hierarchy

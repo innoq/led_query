@@ -50,7 +50,7 @@ led:obs789 a qb:Observation;
     @store.add_triples @repo, "text/turtle", File.read(skos)
 
     concepts, obs_count, hierarchy = @db.determine_concepts("#{@led}location",
-        {}, true, true)
+        {}, :include_observations_count => true, :include_hierarchy => true)
     assert_equal obs_count, 4
     assert_equal concepts, {
       "#{@led}location" => {
@@ -72,12 +72,14 @@ led:obs789 a qb:Observation;
     selected_concepts = { "#{@led}location" => ["#{@led}bavaria"] }
 
     concepts, obs_count = @db.determine_concepts("#{@led}analyte",
-        selected_concepts, true, false, false)
+        selected_concepts, :include_observations_count => true,
+        :include_hierarchy => false, :include_descendants => false)
     assert_equal obs_count, 0
     assert_equal concepts, {}
 
     concepts, obs_count = @db.determine_concepts("#{@led}analyte",
-        selected_concepts, true, false, true)
+        selected_concepts, :include_observations_count => true,
+        :include_hierarchy => false, :include_descendants => true)
     assert_equal obs_count, 1
     assert_equal concepts, {
       "#{@led}analyte" => {
