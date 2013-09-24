@@ -49,7 +49,7 @@ led:obs789 a qb:Observation;
     skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
     @store.add_triples @repo, "text/turtle", File.read(skos)
 
-    concepts, obs_count, hierarchy = @db.determine_concepts(["#{@led}location"],
+    concepts, obs_count, hierarchy = @db.determine_concepts("#{@led}location",
         {}, true, true)
     assert_equal obs_count, 4
     assert_equal concepts, {
@@ -71,12 +71,12 @@ led:obs789 a qb:Observation;
 
     selected_concepts = { "#{@led}location" => ["#{@led}bavaria"] }
 
-    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
+    concepts, obs_count = @db.determine_concepts("#{@led}analyte",
         selected_concepts, true, false, false)
     assert_equal obs_count, 0
     assert_equal concepts, {}
 
-    concepts, obs_count = @db.determine_concepts(["#{@led}analyte"],
+    concepts, obs_count = @db.determine_concepts("#{@led}analyte",
         selected_concepts, true, false, true)
     assert_equal obs_count, 1
     assert_equal concepts, {

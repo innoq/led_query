@@ -66,14 +66,13 @@ class LEDQuery::Database
     end
   end
 
-  # determine concepts from the given dimensions (all URIs), optionally limited
+  # determine concepts from the given dimension (all URIs), optionally limited
   # to those co-occurring with the given set of concepts from other dimensions
   # returns a hash of concepts by type - concepts are URI/labels pairs, with
   # labels indexed by language
-  def determine_concepts(dimensions, concepts_by_dimension={},
+  def determine_concepts(dimension, concepts_by_dimension={},
       include_observations_count=false, include_hierarchy=false,
       include_descendants=false) # TODO: refactor, improve API
-    dimension = dimensions[0] # FIXME: multiple dimensions are not actually supported
     infer = include_hierarchy || include_descendants
 
     bindings = ["?type", "?concept", "?label"]
