@@ -7,7 +7,7 @@ SELECT DISTINCT
     ?obs ?mean ?uom ?title ?desc ?analyte ?location ?startTime ?endTime ?dataset
     ?albl ?llbl ?dlbl
 WHERE {
-    <%= render.call("_concepts_query", :render => render,
+    <%= render.call("_concepts_query",
             :concepts_by_dimension => concepts_by_dimension,
             :include_descendants => include_descendants) %>
     ?obs led:analyte ?analyte .

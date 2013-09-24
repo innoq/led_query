@@ -11,7 +11,7 @@ SELECT DISTINCT <%= bindings.join(" ") %> WHERE {
     BIND (<%= dimension %> AS ?type)
     OPTIONAL { ?concept skos:prefLabel ?label }
 
-    <%= render.call("_concepts_query", :render => render,
+    <%= render.call("_concepts_query",
             :concepts_by_dimension => pre_existing_conditions,
             :include_descendants => include_descendants) %>
 

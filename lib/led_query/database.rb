@@ -206,15 +206,14 @@ class LEDQuery::Database
     return LEDQuery::SPARQL.query(@triplestore, query, infer, @logger)
   end
 
-  def make_query(template, data=nil)
+  def make_query(template, data={})
     templates_dir = File.expand_path(File.join("..", "templates"), __FILE__)
     render = lambda do |template, data| # required for partials -- XXX: hacky!
+      data[:render] = render
       path = File.join(templates_dir, "#{template}.sparql.erb")
       res = File.read(path)
       return Erubis::Eruby.new(res).result(data)
     end
-    data ||= {}
-    data["render"] = render
     return render.call(template, data)
   end
 
