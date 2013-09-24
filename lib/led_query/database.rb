@@ -73,19 +73,26 @@ class LEDQuery::Database
   def determine_concepts(dimensions, concepts_by_dimension={},
       include_observations_count=false, include_hierarchy=false,
       include_descendants=false) # TODO: refactor, improve API
-    make_query = lambda do |variables, conditions|
-      query = <<-EOS.strip
-PREFIX dct:<http://purl.org/dc/terms/>
-PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
-PREFIX qb:<http://purl.org/linked-data/cube#>
+    dimension = dimensions[0] # FIXME: multiple dimensions are not actually supported
+    infer = include_hierarchy || include_descendants
 
-SELECT #{variables} WHERE {
-#{conditions}
-}
-      EOS
-      log :info, "querying concepts"
-      return sparql(query, include_hierarchy || include_descendants)
+    bindings = ["?type", "?concept", "?label"]
+    if include_hierarchy
+      bindings += ["?grancestor", "?ancestor", "?parent", "?ancLabel"]
     end
+
+    query_params = {
+      :dimension => "<#{dimension}>",
+      :bindings => bindings,
+      :include_hierarchy => include_hierarchy,
+      :include_descendants => include_descendants,
+      :pre_existing_conditions => concepts_by_dimension.
+          inject({}) do |memo, (dim, concepts)|
+        memo[dim] = resource_list(concepts)
+        memo
+      end
+    }
+
     register_label = lambda do |hash, concept, label, always=false|
       hash[concept] ||= {} if label || always
       if label
@@ -93,40 +100,10 @@ SELECT #{variables} WHERE {
         hash[concept][lang] = label["value"]
       end
     end
-    unionize = lambda do |arr|
-      return arr.length == 1 ? arr[0] : "\n{\n#{arr.join("\n} UNION {\n")}\n}\n"
-    end
 
-    pre_existing_conditions = concepts_by_dimension.each_with_index.
-        map do |(dim, concepts), i|
-      concepts = resource_list(concepts)
-      [dimension_query(dim, i, include_descendants),
-          "FILTER(?concept#{i} IN (#{concepts}))"].join("\n    ")
-    end
-
-    conditions = dimensions.map do |dim|
-      [dimension_query(dim, nil, include_descendants),
-          "BIND (<#{dim}> AS ?type)",
-          "OPTIONAL { ?concept skos:prefLabel ?label }"].join("\n    ")
-    end
-    conditions = unionize.call(conditions)
-    conditions = ([conditions] + pre_existing_conditions).join("\n")
-
-    query_variables = ["?type", "?concept", "?label"]
-    query_conditions = conditions.clone
-    if include_hierarchy
-      query_variables += ["?grancestor", "?ancestor", "?parent", "?ancLabel"]
-      query_conditions += "\n" + <<-EOS.rstrip
-    OPTIONAL {
-        ?parent skos:narrower ?concept .
-        ?ancestor skos:narrowerTransitive ?concept .
-        OPTIONAL { ?grancestor skos:narrower ?ancestor }
-        OPTIONAL { ?ancestor skos:prefLabel ?ancLabel }
-    }
-      EOS
-    end
-    query_variables = "DISTINCT #{query_variables.join(" ")}"
-    res = make_query.call(query_variables, query_conditions)
+    query = make_query("determine_concepts", query_params)
+    log :info, "querying concepts"
+    res = sparql(query, infer)
     concepts_by_type = res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       type = result["type"]["value"]
       concept = result["concept"]["value"]
@@ -145,7 +122,9 @@ SELECT #{variables} WHERE {
     hierarchy = concepts_by_type.delete("_hierarchy")
 
     if include_observations_count
-      res = make_query.call("(COUNT(DISTINCT ?obs) AS ?obsCount)", conditions) # XXX: separate query inefficient
+      query_params["bindings"] = ["(COUNT(DISTINCT ?obs) AS ?obsCount)"]
+      query = make_query("determine_concepts", query_params)
+      res = sparql(query, infer)
       obs_count = Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
       ret = [concepts_by_type, obs_count]
     else
