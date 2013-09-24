@@ -46,8 +46,7 @@ led:obs789 a qb:Observation;
     led:location led:munich.
     EOS
     @store.add_triples @repo, "text/turtle", rdf
-    skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
-    @store.add_triples @repo, "text/turtle", File.read(skos)
+    @store.add_triples @repo, "text/turtle", File.read(@skos)
 
     concepts, obs_count, hierarchy = @db.determine_concepts("#{@led}location",
         {}, :include_observations_count => true, :include_hierarchy => true)
@@ -143,8 +142,7 @@ led:places a qb:DataSet, skos:Concept;
     skos:inScheme led:sourceScheme.
     EOS
     @store.add_triples @repo, "text/turtle", rdf
-    skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
-    @store.add_triples @repo, "text/turtle", File.read(skos)
+    @store.add_triples @repo, "text/turtle", File.read(@skos)
 
     selected_concepts = { "#{@led}location" => ["#{@led}germany"] }
 
@@ -163,8 +161,7 @@ led:places a qb:DataSet, skos:Concept;
   end
 
   def test_resolve_hierarchy
-    skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
-    @store.add_triples @repo, "text/turtle", File.read(skos)
+    @store.add_triples @repo, "text/turtle", File.read(@skos)
 
     @store.add_triples @repo, "text/turtle", <<-EOS.strip
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -282,8 +279,7 @@ SELECT DISTINCT ?child WHERE {
       assert_equal concepts, ["#{@led}nrw"]
     end
 
-    skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
-    @store.add_triples @repo, "text/turtle", File.read(skos)
+    @store.add_triples @repo, "text/turtle", File.read(@skos)
 
     # with SKOS vocabulary awareness
     [false, true].each do |infer|
@@ -322,8 +318,7 @@ led:saarbruecken a skos:Concept;
     skos:prefLabel "Saarbrücken"@de.
     EOS
     @store.add_triples @repo, "text/turtle", rdf
-    skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
-    @store.add_triples @repo, "text/turtle", File.read(skos)
+    @store.add_triples @repo, "text/turtle", File.read(@skos)
 
     query = <<-EOS
 PREFIX skos:<http://www.w3.org/2004/02/skos/core#>

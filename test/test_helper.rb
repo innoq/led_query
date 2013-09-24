@@ -14,6 +14,7 @@ class DefaultTest < Minitest::Test
 
     @led = "http://data.uba.de/led/"
     @common = File.expand_path("../fixtures/common.ttl", __FILE__)
+    @skos = File.expand_path("../fixtures/skos.ttl", __FILE__)
   end
 
   def teardown
