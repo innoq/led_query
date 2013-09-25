@@ -15,6 +15,19 @@ module LEDQuery::SPARQL
     return res.code == "200" ? JSON.load(res.body) : res
   end
 
+  def self.make_query(template, data={})
+    templates_dir = File.expand_path(File.join("..", "templates"), __FILE__)
+    render = lambda do |template, data| # required for partials -- XXX: hacky!
+      data[:render] = render
+      path = File.join(templates_dir, "#{template}.sparql.erb")
+      res = File.read(path)
+      return Erubis::Eruby.new(res).result(data)
+    end
+    query = render.call(template, data)
+    infer = query[0..18] == "#META infer: true\n\n" # XXX: too strict?
+    return query, infer
+  end
+
   def self.http_request(method, uri, body=nil, headers={})
     uri = URI.parse(uri)
 

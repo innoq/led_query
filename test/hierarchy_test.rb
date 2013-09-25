@@ -207,7 +207,7 @@ SELECT DISTINCT ?grancestor ?ancestor ?parent ?concept WHERE {
     }
 }
     EOS
-    res = @db.sparql(query, true)
+    res = @db._sparql(query, true)
     data = res["results"]["bindings"].map do |result|
       ["grancestor", "ancestor", "parent", "concept"].map do |var|
         result[var]["value"].sub(@led, "") rescue nil
@@ -274,7 +274,7 @@ SELECT DISTINCT ?child WHERE {
 
     # without SKOS vocabulary awareness
     [false, true].each do |infer|
-      res = @db.sparql(query, infer)
+      res = @db._sparql(query, infer)
       concepts = res["results"]["bindings"].map { |r| r["child"]["value"] }
       assert_equal concepts, ["#{@led}nrw"]
     end
@@ -283,7 +283,7 @@ SELECT DISTINCT ?child WHERE {
 
     # with SKOS vocabulary awareness
     [false, true].each do |infer|
-      res = @db.sparql(query, infer)
+      res = @db._sparql(query, infer)
       concepts = res["results"]["bindings"].map { |r| r["child"]["value"] }
 
       expected = ["#{@led}nrw"]
@@ -330,7 +330,7 @@ SELECT DISTINCT ?desc WHERE {
     EOS
 
     [false, true].each do |infer|
-      res = @db.sparql(query, infer)
+      res = @db._sparql(query, infer)
       concepts = res["results"]["bindings"].map { |r| r["desc"]["value"] }.sort
 
       expected = infer == false ? [] : ["#{@led}nrw", "#{@led}sl",

@@ -35,7 +35,8 @@ class LEDQuery::Database
   # (all URIs)
   # returns a list of hashes representing individual observations
   def determine_observations(concepts_by_dimension, include_descendants=false)
-    query, infer = make_query("determine_observations", {
+    log :info, "querying observations"
+    res = sparql("determine_observations", {
       :include_descendants => include_descendants,
       :concepts_by_dimension => concepts_by_dimension.
           inject({}) do |memo, (dim, concepts)|
@@ -43,8 +44,6 @@ class LEDQuery::Database
         memo
       end
     })
-    log :info, "querying observations"
-    res = sparql(query, infer)
     return res["results"]["bindings"].map do |result| # TODO: error handling
       analyte_label = result["albl"]["value"] rescue nil
       location_label = result["llbl"]["value"] rescue nil
@@ -108,9 +107,8 @@ class LEDQuery::Database
       end
     end
 
-    query, infer = make_query("determine_concepts", query_params)
     log :info, "querying concepts"
-    res = sparql(query, infer || force_infer)
+    res = sparql("determine_concepts", query_params, force_infer)
     concepts_by_type = res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       type = result["type"]["value"]
       concept = result["concept"]["value"]
@@ -130,8 +128,7 @@ class LEDQuery::Database
 
     if include_observations_count
       query_params["bindings"] = ["(COUNT(DISTINCT ?obs) AS ?obsCount)"]
-      query, infer = make_query("determine_concepts", query_params)
-      res = sparql(query, infer || force_infer)
+      res = sparql("determine_concepts", query_params, force_infer)
       obs_count = Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
       ret = [concepts_by_type, obs_count]
     else
@@ -143,9 +140,8 @@ class LEDQuery::Database
 
   # returns a hash of URI/labels pairs, with labels indexed by language
   def determine_dimensions
-    query, infer = make_query("determine_dimensions")
     log :info, "querying dimensions"
-    res = sparql(query, infer)
+    res = sparql("determine_dimensions")
     return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       id = result["dim"]["value"]
       memo[id] ||= {}
@@ -158,7 +154,8 @@ class LEDQuery::Database
   end
 
   def observations_count(concepts_by_dimension={}, include_descendants=false)
-    query, infer = make_query("determine_observations_count", { # XXX: largely duplicates `determine_observations`
+    log :info, "querying observations count"
+    res = sparql("determine_observations_count", { # XXX: largely duplicates `determine_observations`
       :include_descendants => include_descendants,
       :concepts_by_dimension => concepts_by_dimension.
           inject({}) do |memo, (dim, concepts)|
@@ -166,8 +163,6 @@ class LEDQuery::Database
         memo
       end
     })
-    log :info, "querying observations count"
-    res = sparql(query, infer)
     return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
   end
 
@@ -202,21 +197,13 @@ class LEDQuery::Database
     return res
   end
 
-  def sparql(query, infer=false)
-    return LEDQuery::SPARQL.query(@triplestore, query, infer, @logger)
+  def sparql(query_template, query_params={}, force_infer=false)
+    query, infer = LEDQuery::SPARQL.make_query(query_template, query_params)
+    return _sparql(query, infer || force_infer)
   end
 
-  def make_query(template, data={})
-    templates_dir = File.expand_path(File.join("..", "templates"), __FILE__)
-    render = lambda do |template, data| # required for partials -- XXX: hacky!
-      data[:render] = render
-      path = File.join(templates_dir, "#{template}.sparql.erb")
-      res = File.read(path)
-      return Erubis::Eruby.new(res).result(data)
-    end
-    query = render.call(template, data)
-    infer = query[0..18] == "#META infer: true\n\n" # XXX: too strict?
-    return query, infer
+  def _sparql(query, infer)
+    return LEDQuery::SPARQL.query(@triplestore, query, infer, @logger)
   end
 
   def log(level, msg)
