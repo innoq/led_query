@@ -74,13 +74,11 @@ class LEDQuery::Database
   # * `:include_hierarchy`: adds hierarchy to return value
   # * `:include_descendants`: consider concepts' descendants when determining
   #    co-occurrence (e.g. "animal" implicitly includes "cat" and "dog")
-  # * `:infer`: force inferences
   # note that the return value changes depending on the selected options
   def determine_concepts(dimension, concepts_by_dimension={}, options={})
     include_observations_count = options[:include_observations_count] || false
     include_hierarchy = options[:include_hierarchy] || false
     include_descendants = options[:include_descendants] || false
-    force_infer = options[:infer] || false
 
     bindings = ["?type", "?concept", "?label"]
     if include_hierarchy
@@ -108,7 +106,7 @@ class LEDQuery::Database
     end
 
     log :info, "querying concepts"
-    res = sparql("determine_concepts", query_params, force_infer)
+    res = sparql("determine_concepts", query_params)
     concepts_by_type = res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
       type = result["type"]["value"]
       concept = result["concept"]["value"]
@@ -128,7 +126,7 @@ class LEDQuery::Database
 
     if include_observations_count
       query_params["bindings"] = ["(COUNT(DISTINCT ?obs) AS ?obsCount)"]
-      res = sparql("determine_concepts", query_params, force_infer)
+      res = sparql("determine_concepts", query_params)
       obs_count = Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
       ret = [concepts_by_type, obs_count]
     else
@@ -197,9 +195,9 @@ class LEDQuery::Database
     return res
   end
 
-  def sparql(query_template, query_params={}, force_infer=false)
+  def sparql(query_template, query_params={})
     query, infer = LEDQuery::SPARQL.make_query(query_template, query_params)
-    return _sparql(query, infer || force_infer)
+    return _sparql(query, infer)
   end
 
   def _sparql(query, infer)

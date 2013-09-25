@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    led_query (1.6.1)
+    led_query (1.7.0)
       erubis
 
 GEM
