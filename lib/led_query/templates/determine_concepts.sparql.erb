@@ -11,6 +11,11 @@ SELECT DISTINCT <%= bindings.join(" ") %> WHERE {
             :var => nil
     } %>
     BIND (<%= dimension %> AS ?type)
+    {
+      ?concept skos:exactMatch* ?match .
+    } UNION { # XXX: should not be necessary, but empirically required (Sesame)
+      ?match skos:exactMatch* ?concept .
+    }
     OPTIONAL { ?concept skos:prefLabel ?label }
 
     <%= render.call("_concepts_query",
@@ -26,3 +31,6 @@ SELECT DISTINCT <%= bindings.join(" ") %> WHERE {
     }
     <% end %>
 }
+<% if grouped %>
+GROUP BY ?obs
+<% end %>

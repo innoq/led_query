@@ -64,13 +64,10 @@ led:cologne skos:exactMatch led:koeln.
 
     concepts, obs_count = @db.determine_concepts("#{@led}location", {},
         :include_observations_count => true, :infer => true)
-    # FIXME: the following is *not* the desired result; we want to combine
-    #        mapped concepts into a single result
     assert_equal obs_count, 2
     assert_equal concepts, {
       "#{@led}location" => {
-        "#{@led}koeln" => { "de" => "Köln" },
-        "#{@led}cologne" => {}
+        "#{@led}cologne" => { "de" => "Köln" },
       }
     }
   end
