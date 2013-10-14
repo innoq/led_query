@@ -4,6 +4,5 @@
             :include_descendants => include_descendants,
             :var => i
     } %>
-    ?concept<%= i %> skos:exactMatch* ?match<%= i %> .
-    FILTER(?match<%= i %> IN (<%= concepts %>))
+    FILTER(?concept<%= i %> IN (<%= concepts %>))
 <% end %>
