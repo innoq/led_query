@@ -146,15 +146,15 @@ led:places a qb:DataSet, skos:Concept;
 
     selected_concepts = { "#{@led}location" => ["#{@led}germany"] }
 
-    count = @db.observations_count(selected_concepts)
+    counts = @db.observations_count(selected_concepts)
     observations = @db.determine_observations(selected_concepts)
-    assert_equal count, 0
-    assert_equal observations.length, count
+    assert_equal counts, { nil => { "count" => 0, "label" => nil } }
+    assert_equal observations.length, counts[nil]["count"]
 
-    count = @db.observations_count(selected_concepts, true)
+    counts = @db.observations_count(selected_concepts, true)
     observations = @db.determine_observations(selected_concepts, true)
-    assert_equal count, 4
-    assert_equal observations.length, count
+    assert_equal counts, { "#{@led}places" => { "count" => 4, "label" => nil } }
+    assert_equal observations.length, counts["#{@led}places"]["count"]
     results = observations.map { |obs| obs["obs"] }
     assert_equal results.to_set, ["#{@led}obs123", "#{@led}obs321",
         "#{@led}obs456", "#{@led}obs789"].to_set

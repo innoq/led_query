@@ -163,7 +163,15 @@ class LEDQuery::Database
         memo
       end
     })
-    return Float(res["results"]["bindings"][0]["obsCount"]["value"]).to_i
+
+    return res["results"]["bindings"].inject({}) do |memo, result|
+      dataset = result["dataset"]["value"] rescue nil
+      memo[dataset] = {
+        "count" => Float(result["obsCount"]["value"]).to_i,
+        "label" => (result["label"]["value"] rescue nil)
+      }
+      memo
+    end
   end
 
   # `var` is used as suffix to create pseudo-local variables

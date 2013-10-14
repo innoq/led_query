@@ -35,10 +35,12 @@ led:sand a skos:Concept;
     @store.add_triples @repo, "text/turtle", rdf
 
     selected_concepts = { "#{@led}location" => ["#{@led}westerzgebirge"] }
-    count = @db.observations_count(selected_concepts)
+    counts = @db.observations_count(selected_concepts)
     observations = @db.determine_observations(selected_concepts)
-    assert_equal count, 1
-    assert_equal observations.length, count
+    assert_equal counts, {
+      "#{@led}bodenportal" => { "count" => 1, "label" => "Bodenportal" }
+    }
+    assert_equal observations.length, counts["#{@led}bodenportal"]["count"]
     results = observations.map do |obs|
       ["obs", "mean", "uom", "title", "desc", "time", "analyte", "location",
           "source"].map { |key| obs[key].to_s }.join(" | ")

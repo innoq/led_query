@@ -188,11 +188,15 @@ led:obs789 a qb:Observation;
     EOS
     @store.add_triples @repo, "text/turtle", rdf
 
-    count = @db.observations_count
-    assert_equal count, 4
+    counts = @db.observations_count
+    assert_equal counts, {
+      "#{@led}upb" => { "count" => 1, "label" => "Umweltprobenbank" },
+      "#{@led}eea" => { "count" => 3, "label" => "Europäische Umweltagentur" }
+    }
 
     selected_concepts = { "#{@led}location" => ["#{@led}berlin"] }
-    count = @db.observations_count(selected_concepts)
+    counts = @db.observations_count(selected_concepts)
+    count = counts["#{@led}upb"]["count"] + counts["#{@led}eea"]["count"]
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 3
     assert_equal observations.length, count
@@ -206,17 +210,21 @@ led:obs789 a qb:Observation;
 #{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Umweltprobenbank"<#{@led}upb>
     EOS
 
-    count = @db.observations_count({
+    counts = @db.observations_count({
       "#{@led}location" => ["#{@led}berlin"],
       "#{@led}source" => ["#{@led}eea"]
     })
-    assert_equal count, 2
+    assert_equal counts, {
+      "#{@led}eea" => { "count" => 2, "label" => "Europäische Umweltagentur" }
+    }
 
-    count = @db.observations_count({
+    counts = @db.observations_count({
       "#{@led}location" => ["#{@led}berlin"],
       "#{@led}source" => ["#{@led}upb"]
     })
-    assert_equal count, 1
+    assert_equal counts, {
+      "#{@led}upb" => { "count" => 1, "label" => "Umweltprobenbank" },
+    }
   end
 
   def test_time_handling
@@ -280,11 +288,14 @@ led:obs987 a qb:Observation; # NB: no temporal reference
     EOS
     @store.add_triples @repo, "text/turtle", rdf
 
-    count = @db.observations_count
-    assert_equal count, 5
+    counts = @db.observations_count
+    assert_equal counts, {
+      "#{@led}eea" => { "count" => 5, "label" => "Europäische Umweltagentur" }
+    }
 
     selected_concepts = { "#{@led}temporal" => ["2001"] }
-    count = @db.observations_count(selected_concepts)
+    counts = @db.observations_count(selected_concepts)
+    count = counts["#{@led}eea"]["count"]
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 2
     assert_equal observations.length, count
@@ -301,7 +312,8 @@ led:obs987 a qb:Observation; # NB: no temporal reference
       "#{@led}temporal" => ["2001"],
       "#{@led}analyte" => ["#{@led}nitrogen"]
     }
-    count = @db.observations_count(selected_concepts)
+    counts = @db.observations_count(selected_concepts)
+    count = counts["#{@led}eea"]["count"]
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 1
     assert_equal observations.length, count
@@ -315,7 +327,8 @@ led:obs987 a qb:Observation; # NB: no temporal reference
 
     # ensure temporal references are optional
     selected_concepts = { "#{@led}location" => ["#{@led}berlin"] }
-    count = @db.observations_count(selected_concepts)
+    counts = @db.observations_count(selected_concepts)
+    count = counts["#{@led}eea"]["count"]
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 4
     assert_equal observations.length, count
