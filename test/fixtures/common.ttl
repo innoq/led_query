@@ -5,32 +5,32 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix led: <http://data.uba.de/led/> .
 
-# defines common LED "infrastructure", independent of any particular data source
+# dimensions
 
-led:temporal a qb:DimensionProperty ;
-	rdfs:subpropertyOf dc:temporal ;
-	skos:prefLabel "Zeitrahmen"@de .
-
-led:sourceScheme a skos:ConceptScheme .
 led:source a qb:DimensionProperty ;
 	rdfs:subpropertyOf qb:dataSet ;
 	skos:prefLabel "Datenquelle"@de ;
 	qb:codeList led:sourceScheme .
+led:sourceScheme a skos:ConceptScheme .
 
-led:locationScheme a skos:ConceptScheme .
+led:analyte a qb:DimensionProperty ;
+	skos:prefLabel "Analyt"@de ;
+	skos:altLabel "Parameter"@de ;
+	qb:codeList led:analyteScheme .
+led:analyteScheme a skos:ConceptScheme .
+
+led:observedMedia a qb:DimensionProperty ;
+	skos:prefLabel "Untersuchungsmedium"@de ;
+	qb:codeList led:observedMediaScheme .
+led:observedMediaScheme a skos:ConceptScheme .
+
 led:location a qb:DimensionProperty ;
 	skos:prefLabel "Raumbezug"@de ;
 	skos:altLabel "Probenahmegebiet"@de ;
 	skos:altLabel "Probenahmestelle"@de ;
 	qb:codeList led:locationScheme .
+led:locationScheme a skos:ConceptScheme .
 
-led:analyteScheme a skos:ConceptScheme .
-led:analyte a qb:DimensionProperty ;
-	skos:prefLabel "Analyt"@de ;
-	skos:altLabel "Parameter"@de ;
-	qb:codeList led:analyteScheme .
-
-led:observedMediaScheme a skos:ConceptScheme .
-led:observedMedia a qb:DimensionProperty ;
-	skos:prefLabel "Untersuchungsmedium"@de ;
-	qb:codeList led:observedMediaScheme .
+led:temporal a qb:DimensionProperty ;
+	rdfs:subpropertyOf dc:temporal ;
+	skos:prefLabel "Zeitrahmen"@de .
