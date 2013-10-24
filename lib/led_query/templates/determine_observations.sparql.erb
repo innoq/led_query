@@ -6,14 +6,16 @@ PREFIX qb:<http://purl.org/linked-data/cube#>
 PREFIX led:<http://data.uba.de/led/>
 
 SELECT DISTINCT
-    ?obs ?mean ?uom ?title ?desc ?analyte ?location ?startTime ?endTime ?dataset
-    ?albl ?llbl ?dlbl
+    ?obs ?mean ?uom ?title ?desc ?medium ?analyte ?location ?startTime ?endTime
+    ?dataset ?mlbl ?albl ?llbl ?dlbl
 WHERE {
     <%= render.call("_concepts_query",
             :concepts_by_dimension => concepts_by_dimension,
             :include_descendants => include_descendants) %>
+
     ?obs led:analyte ?analyte .
     ?obs led:location ?location .
+    ?obs led:observedMedia ?medium .
     ?obs led:source ?dataset .
     ?obs a qb:Observation .
     OPTIONAL { ?obs led:mean ?mean } .
@@ -25,6 +27,7 @@ WHERE {
         ?time dct:start ?startTime .
         ?time dct:end ?endTime .
     }
+    OPTIONAL { ?medium skos:prefLabel ?mlbl . }
     OPTIONAL { ?analyte skos:prefLabel ?albl . }
     OPTIONAL { ?location skos:prefLabel ?llbl . }
     OPTIONAL { ?dataset skos:prefLabel ?dlbl . }

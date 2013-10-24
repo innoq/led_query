@@ -45,6 +45,7 @@ class LEDQuery::Database
       end
     })
     return res["results"]["bindings"].map do |result| # TODO: error handling
+      medium_label = result["mlbl"]["value"] rescue nil
       analyte_label = result["albl"]["value"] rescue nil
       location_label = result["llbl"]["value"] rescue nil
       source_label = result["dlbl"]["value"] rescue nil
@@ -55,6 +56,7 @@ class LEDQuery::Database
         "uom" => (result["uom"]["value"] rescue nil),
         "title" => (result["title"]["value"] rescue nil),
         "desc" => (result["desc"]["value"] rescue nil),
+        "medium" => Link.new(result["medium"]["value"], medium_label),
         "analyte" => Link.new(result["analyte"]["value"], analyte_label),
         "location" => Link.new(result["location"]["value"], location_label),
         "source" => Link.new(result["dataset"]["value"], source_label),

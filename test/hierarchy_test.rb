@@ -110,6 +110,10 @@ led:germany a skos:Concept;
     skos:inScheme led:locationScheme;
     skos:prefLabel "Bundesrepublik Deutschland"@de.
 
+led:fluvialWater a skos:Concept;
+    skos:inScheme led:observedMediaScheme;
+    skos:prefLabel "Flusswasser"@de.
+
 led:ammonium rdf:type skos:Concept;
     skos:inScheme led:analyteScheme;
     skos:prefLabel "Ammonium"@de.
@@ -119,21 +123,25 @@ led:phosphorus a skos:Concept;
 
 led:obs123 a qb:Observation;
     led:source led:places;
+    led:observedMedia led:fluvialWater;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2000; dct:end 2000 ].
 led:obs321 a qb:Observation;
     led:source led:places;
+    led:observedMedia led:fluvialWater;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2000; dct:end 2000 ].
 led:obs456 a qb:Observation;
     led:source led:places;
+    led:observedMedia led:fluvialWater;
     led:analyte led:phosphorus;
     led:location led:hamburg;
     led:temporal [ dct:start 2000; dct:end 2000 ].
 led:obs789 a qb:Observation;
     led:source led:places;
+    led:observedMedia led:fluvialWater;
     led:analyte led:phosphorus;
     led:location led:munich;
     led:temporal [ dct:start 2000; dct:end 2000 ].

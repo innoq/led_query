@@ -140,6 +140,10 @@ led:upb a qb:DataSet, skos:Concept;
     skos:inScheme led:sourceScheme;
     skos:prefLabel "Umweltprobenbank"@de.
 
+led:fluvialWater a skos:Concept;
+    skos:inScheme led:observedMediaScheme;
+    skos:prefLabel "Flusswasser"@de.
+
 led:berlin a skos:Concept;
     skos:inScheme led:locationScheme;
     skos:prefLabel "Berlin"@de.
@@ -159,6 +163,7 @@ led:nitrogen a skos:Concept;
 
 led:obs123 a qb:Observation;
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2001; dct:end 2001 ];
@@ -166,6 +171,7 @@ led:obs123 a qb:Observation;
     led:uom "mg/l N".
 led:obs321 a qb:Observation;
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 1996; dct:end 1996 ];
@@ -173,6 +179,7 @@ led:obs321 a qb:Observation;
     led:uom "mg/l N".
 led:obs456 a qb:Observation;
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:phosphorus;
     led:location led:hamburg;
     led:temporal [ dct:start 2007; dct:end 2007 ];
@@ -180,6 +187,7 @@ led:obs456 a qb:Observation;
     led:uom "mg/l P".
 led:obs789 a qb:Observation;
     led:source led:upb;
+    led:observedMedia led:fluvialWater;
     led:analyte led:nitrogen;
     led:location led:berlin;
     led:temporal [ dct:start 2011; dct:end 2011 ];
@@ -201,13 +209,13 @@ led:obs789 a qb:Observation;
     assert_equal count, 3
     assert_equal observations.length, count
     results = observations.map do |obs|
-      ["obs", "mean", "uom", "time", "analyte", "location", "source"].
+      ["obs", "mean", "uom", "time", "medium", "analyte", "location", "source"].
           map { |key| obs[key].to_s }.join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
-#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
-#{@led}obs321 | 3.21 | mg/l N | [1996, 1996] | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
-#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Umweltprobenbank"<#{@led}upb>
+#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Flusswasser"<#{@led}fluvialWater> | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+#{@led}obs321 | 3.21 | mg/l N | [1996, 1996] | "Flusswasser"<#{@led}fluvialWater> | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Flusswasser"<#{@led}fluvialWater> | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Umweltprobenbank"<#{@led}upb>
     EOS
 
     counts = @db.observations_count({
@@ -234,6 +242,10 @@ led:eea a qb:DataSet, skos:Concept;
     skos:inScheme led:sourceScheme;
     skos:prefLabel "Europäische Umweltagentur"@de.
 
+led:fluvialWater a skos:Concept;
+    skos:inScheme led:observedMediaScheme;
+    skos:prefLabel "Flusswasser"@de.
+
 led:berlin a skos:Concept;
     skos:inScheme led:locationScheme;
     skos:prefLabel "Berlin"@de.
@@ -253,6 +265,7 @@ led:nitrogen a skos:Concept;
 
 led:obs123 a qb:Observation;
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2001; dct:end 2001 ];
@@ -260,6 +273,7 @@ led:obs123 a qb:Observation;
     led:uom "mg/l N".
 led:obs321 a qb:Observation;
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:nitrogen;
     led:location led:berlin;
     led:temporal [ dct:start 2001; dct:end 2001 ];
@@ -267,6 +281,7 @@ led:obs321 a qb:Observation;
     led:uom "mg/l N".
 led:obs456 a qb:Observation;
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:phosphorus;
     led:location led:hamburg;
     led:temporal [ dct:start 2007; dct:end 2007 ];
@@ -274,6 +289,7 @@ led:obs456 a qb:Observation;
     led:uom "mg/l P".
 led:obs789 a qb:Observation;
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:temporal [ dct:start 2011; dct:end 2011 ];
@@ -281,6 +297,7 @@ led:obs789 a qb:Observation;
     led:uom "mg/l N".
 led:obs987 a qb:Observation; # NB: no temporal reference
     led:source led:eea;
+    led:observedMedia led:fluvialWater;
     led:analyte led:ammonium;
     led:location led:berlin;
     led:mean 9.87;
