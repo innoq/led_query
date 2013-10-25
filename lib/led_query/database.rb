@@ -50,6 +50,12 @@ class LEDQuery::Database
         obs.send(attr) << value unless empty
       end
 
+      extra_dim = make_link(result, "extraDim", "xdlbl") rescue nil
+      if extra_dim
+        obs.extras[extra_dim] ||= Set.new
+        obs.extras[extra_dim] << make_link(result, "extraDimValue", "xdvlbl") rescue nil
+      end
+
       memo
     end
   end

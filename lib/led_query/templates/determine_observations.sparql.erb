@@ -6,8 +6,12 @@ PREFIX qb:<http://purl.org/linked-data/cube#>
 PREFIX led:<http://data.uba.de/led/>
 
 SELECT DISTINCT
-    ?obs ?mean ?uom ?title ?desc ?medium ?analyte ?location ?startTime ?endTime
-    ?dataset ?mlbl ?albl ?llbl ?dlbl
+    ?obs
+    ?mean ?uom
+    ?title ?desc
+    ?dataset ?medium ?analyte ?location ?startTime ?endTime
+    ?mlbl ?albl ?llbl ?dlbl
+    ?extraDim ?extraDimValue ?xdlbl ?xdvlbl
 WHERE {
     <%= render.call("_concepts_query",
             :concepts_by_dimension => concepts_by_dimension,
@@ -31,4 +35,12 @@ WHERE {
     OPTIONAL { ?analyte skos:prefLabel ?albl . }
     OPTIONAL { ?location skos:prefLabel ?llbl . }
     OPTIONAL { ?dataset skos:prefLabel ?dlbl . }
+
+    OPTIONAL {
+      ?extraDim a qb:DimensionProperty .
+      FILTER(!STRSTARTS(STR(?extraDim), "http://data.uba.de/led/"))
+      ?obs ?extraDim ?extraDimValue .
+      OPTIONAL { ?extraDim skos:prefLabel ?xdlbl . }
+      OPTIONAL { ?extraDimValue skos:prefLabel ?xdvlbl . }
+    }
 }

@@ -1,12 +1,13 @@
 require "led_query"
 
 class LEDQuery::Observation
-  attr_reader :uri
+  attr_reader :uri, :extras
   attr_accessor :source, :medium, :analyte, :location, :time, :mean, :uom,
       :title, :desc
 
   def initialize(uri)
     @uri = uri
+    @extras = {} # additional context (custom dimensions and attributes)
 
     # attributes default to sets
     slots = [:source, :medium, :analyte, :location, :time, :mean, :uom, :title,
