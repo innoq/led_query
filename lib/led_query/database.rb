@@ -7,7 +7,7 @@ class LEDQuery::Database
   class Link # XXX: does not belong here
     attr_reader :uri
 
-    def initialize(uri, label)
+    def initialize(uri, label=nil)
       @uri = uri
       @label = label
     end
@@ -19,6 +19,10 @@ class LEDQuery::Database
     def to_s
       res = "<#{@uri}>"
       return @label ? %("#{@label}"#{res}) : res
+    end
+
+    def inspect
+      return "#<#{self.class} #{self.to_s}.>"
     end
 
   end
@@ -45,10 +49,6 @@ class LEDQuery::Database
       end
     })
     return res["results"]["bindings"].map do |result| # TODO: error handling
-      medium_label = result["mlbl"]["value"] rescue nil
-      analyte_label = result["albl"]["value"] rescue nil
-      location_label = result["llbl"]["value"] rescue nil
-      source_label = result["dlbl"]["value"] rescue nil
       {
         "obs" => result["obs"]["value"],
         # XXX: hard-coding data types for now
@@ -56,10 +56,10 @@ class LEDQuery::Database
         "uom" => (result["uom"]["value"] rescue nil),
         "title" => (result["title"]["value"] rescue nil),
         "desc" => (result["desc"]["value"] rescue nil),
-        "medium" => Link.new(result["medium"]["value"], medium_label),
-        "analyte" => Link.new(result["analyte"]["value"], analyte_label),
-        "location" => Link.new(result["location"]["value"], location_label),
-        "source" => Link.new(result["dataset"]["value"], source_label),
+        "source" => make_link(result, "dataset", "dlbl"),
+        "medium" => make_link(result, "medium", "mlbl"),
+        "analyte" => make_link(result, "analyte", "albl"),
+        "location" => make_link(result, "location", "llbl"),
         "time" => ["startTime", "endTime"].map do |key|
           Float(result[key]["value"]).to_i rescue nil
         end
@@ -205,6 +205,11 @@ class LEDQuery::Database
       end
     end.join(", ")
     return res
+  end
+
+  def make_link(result, uri_key, label_key)
+    label = result[label_key]["value"] rescue nil
+    return Link.new(result[uri_key]["value"], label)
   end
 
   def sparql(query_template, query_params={}, force_infer=false)
