@@ -1,52 +1,9 @@
 require "erubis"
 require "led_query"
+require "led_query/models"
 require "led_query/sparql"
 
 class LEDQuery::Database
-
-  class Link # XXX: does not belong here
-    attr_reader :uri
-
-    def initialize(uri, label=nil)
-      @uri = uri
-      @label = label
-    end
-
-    def label
-      return @label || @uri
-    end
-
-    def to_s
-      res = "<#{@uri}>"
-      return @label ? %("#{@label}"#{res}) : res
-    end
-
-    def inspect
-      return "#<#{self.class} #{self.to_s}.>"
-    end
-
-  end
-
-  class Observation # XXX: does not belong here
-    attr_reader :uri
-    attr_accessor :source, :medium, :analyte, :location, :time, :mean, :uom,
-        :title, :desc
-
-    alias_method :obs, :uri # XXX: required only for backwards compatibility
-
-    def initialize(uri)
-      @uri = uri
-    end
-
-    def [](key)
-      return self.send(key)
-    end
-
-    def is_metadata?
-      return !@mean
-    end
-
-  end
 
   # `triplestore` is the URL of the Sesame repository (typically
   # .../openrdf-sesame/repositories/my-repo`)
@@ -70,7 +27,7 @@ class LEDQuery::Database
       end
     })
     return res["results"]["bindings"].map do |result| # TODO: error handling
-      obs = Observation.new(result["obs"]["value"])
+      obs = LEDQuery::Observation.new(result["obs"]["value"])
       obs.mean = Float(result["mean"]["value"]) rescue nil
       obs.uom = result["uom"]["value"] rescue nil
       obs.title = result["title"]["value"] rescue nil
@@ -228,7 +185,7 @@ class LEDQuery::Database
 
   def make_link(result, uri_key, label_key)
     label = result[label_key]["value"] rescue nil
-    return Link.new(result[uri_key]["value"], label)
+    return LEDQuery::Link.new(result[uri_key]["value"], label)
   end
 
   def sparql(query_template, query_params={}, force_infer=false)
