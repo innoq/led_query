@@ -26,20 +26,31 @@ class LEDQuery::Database
         memo
       end
     })
-    return res["results"]["bindings"].map do |result| # TODO: error handling
-      obs = LEDQuery::Observation.new(result["obs"]["value"])
-      obs.mean = Float(result["mean"]["value"]) rescue nil
-      obs.uom = result["uom"]["value"] rescue nil
-      obs.title = result["title"]["value"] rescue nil
-      obs.desc = result["desc"]["value"] rescue nil
-      obs.source = make_link(result, "dataset", "dlbl")
-      obs.medium = make_link(result, "medium", "mlbl")
-      obs.analyte = make_link(result, "analyte", "albl")
-      obs.location = make_link(result, "location", "llbl")
-      obs.time = ["startTime", "endTime"].map do |key|
-        Float(result[key]["value"]).to_i rescue nil
+
+    observations = res["results"]["bindings"] rescue []
+    return observations.inject({}) do |memo, result|
+      uri = result["obs"]["value"]
+      memo[uri] ||= LEDQuery::Observation.new(uri)
+      obs = memo[uri]
+
+      {
+        "mean" => (Float(result["mean"]["value"]) rescue nil),
+        "uom" => (result["uom"]["value"] rescue nil),
+        "title" => (result["title"]["value"] rescue nil),
+        "desc" => (result["desc"]["value"] rescue nil),
+        "source" => make_link(result, "dataset", "dlbl"),
+        "medium" => make_link(result, "medium", "mlbl"),
+        "analyte" => make_link(result, "analyte", "albl"),
+        "location" => make_link(result, "location", "llbl"),
+        "time" => ["startTime", "endTime"].map do |key|
+          Float(result[key]["value"]).to_i rescue nil
+        end
+      }.each do |attr, value|
+        empty = value.is_a?(Array) ? value.compact.empty? : !value
+        obs.send(attr) << value unless empty
       end
-      obs
+
+      memo
     end
   end
 

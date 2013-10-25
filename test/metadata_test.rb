@@ -41,9 +41,10 @@ led:sand a skos:Concept;
       "#{@led}bodenportal" => { "count" => 1, "label" => "Bodenportal" }
     }
     assert_equal observations.length, counts["#{@led}bodenportal"]["count"]
-    results = observations.map do |obs|
-      ["obs", "mean", "uom", "title", "desc", "time", "analyte", "location",
-          "source"].map { |key| obs[key].to_s }.join(" | ")
+    results = observations.map do |uri, obs|
+      ["mean", "uom", "title", "desc", "time", "analyte", "location", "source"].
+          map { |attr| obs[attr].map(&:to_s).join(", ") }.unshift(uri).
+          join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
 #{@led}soil123 |  |  | Hello World | lorem ipsum dolor sit amet | [1996, 1996] | "Sand"<#{@led}sand> | "Westerzgebirge"<#{@led}westerzgebirge> | "Bodenportal"<#{@led}bodenportal>

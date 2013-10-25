@@ -163,7 +163,7 @@ led:places a qb:DataSet, skos:Concept;
     observations = @db.determine_observations(selected_concepts, true)
     assert_equal counts, { "#{@led}places" => { "count" => 4, "label" => nil } }
     assert_equal observations.length, counts["#{@led}places"]["count"]
-    results = observations.map { |obs| obs["obs"] }
+    results = observations.map { |uri, obs| uri }
     assert_equal results.to_set, ["#{@led}obs123", "#{@led}obs321",
         "#{@led}obs456", "#{@led}obs789"].to_set
   end

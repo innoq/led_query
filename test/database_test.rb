@@ -208,9 +208,10 @@ led:obs789 a qb:Observation;
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 3
     assert_equal observations.length, count
-    results = observations.map do |obs|
-      ["obs", "mean", "uom", "time", "medium", "analyte", "location", "source"].
-          map { |key| obs[key].to_s }.join(" | ")
+    results = observations.map do |uri, obs|
+      ["mean", "uom", "time", "medium", "analyte", "location", "source"].
+          map { |attr| obs[attr].map(&:to_s).join(", ") }.unshift(uri).
+          join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
 #{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Flusswasser"<#{@led}fluvialWater> | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
@@ -316,9 +317,10 @@ led:obs987 a qb:Observation; # NB: no temporal reference
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 2
     assert_equal observations.length, count
-    results = observations.map do |obs|
-      ["obs", "mean", "uom", "time", "analyte", "location", "source"].
-          map { |key| obs[key].to_s }.join(" | ")
+    results = observations.map do |uri, obs|
+      ["mean", "uom", "time", "analyte", "location", "source"].
+          map { |attr| obs[attr].map(&:to_s).join(", ") }.unshift(uri).
+          join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
 #{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
@@ -334,9 +336,10 @@ led:obs987 a qb:Observation; # NB: no temporal reference
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 1
     assert_equal observations.length, count
-    results = observations.map do |obs|
-      ["obs", "mean", "uom", "time", "analyte", "location", "source"].
-          map { |key| obs[key].to_s }.join(" | ")
+    results = observations.map do |uri, obs|
+      ["mean", "uom", "time", "analyte", "location", "source"].
+          map { |attr| obs[attr].map(&:to_s).join(", ") }.unshift(uri).
+          join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
 #{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
@@ -349,15 +352,16 @@ led:obs987 a qb:Observation; # NB: no temporal reference
     observations = @db.determine_observations(selected_concepts)
     assert_equal count, 4
     assert_equal observations.length, count
-    results = observations.map do |obs|
-      ["obs", "mean", "uom", "time", "location"].
-          map { |key| obs[key].to_s }.join(" | ")
+    results = observations.map do |uri, obs|
+      ["mean", "uom", "time", "location"].
+          map { |attr| obs[attr].map(&:to_s).join(", ") }.unshift(uri).
+          join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
 #{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Berlin"<#{@led}berlin>
 #{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Berlin"<#{@led}berlin>
 #{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Berlin"<#{@led}berlin>
-#{@led}obs987 | 9.87 | mg/l N | [nil, nil] | "Berlin"<#{@led}berlin>
+#{@led}obs987 | 9.87 | mg/l N |  | "Berlin"<#{@led}berlin>
     EOS
   end
 

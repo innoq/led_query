@@ -5,10 +5,13 @@ class LEDQuery::Observation
   attr_accessor :source, :medium, :analyte, :location, :time, :mean, :uom,
       :title, :desc
 
-  alias_method :obs, :uri # XXX: required only for backwards compatibility
-
   def initialize(uri)
     @uri = uri
+
+    # attributes default to sets
+    slots = [:source, :medium, :analyte, :location, :time, :mean, :uom, :title,
+        :desc] # XXX: duplicates `attr_accessor` above
+    slots.each { |slot| instance_variable_set(:"@#{slot}", Set.new) }
   end
 
   def [](key)
@@ -16,7 +19,7 @@ class LEDQuery::Observation
   end
 
   def is_metadata?
-    return !@mean
+    return @mean.empty?
   end
 
 end
@@ -31,6 +34,14 @@ class LEDQuery::Link
 
   def label
     return @label || @uri
+  end
+
+  def eql?(other)
+    self.to_s == other.to_s
+  end
+
+  def hash
+    return [@uri, @label].hash
   end
 
   def to_s
