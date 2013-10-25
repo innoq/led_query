@@ -27,6 +27,27 @@ class LEDQuery::Database
 
   end
 
+  class Observation # XXX: does not belong here
+    attr_reader :uri
+    attr_accessor :source, :medium, :analyte, :location, :time, :mean, :uom,
+        :title, :desc
+
+    alias_method :obs, :uri # XXX: required only for backwards compatibility
+
+    def initialize(uri)
+      @uri = uri
+    end
+
+    def [](key)
+      return self.send(key)
+    end
+
+    def is_metadata?
+      return !@mean
+    end
+
+  end
+
   # `triplestore` is the URL of the Sesame repository (typically
   # .../openrdf-sesame/repositories/my-repo`)
   # `logger` is an optional Logger (or compatbile) instance
@@ -49,21 +70,19 @@ class LEDQuery::Database
       end
     })
     return res["results"]["bindings"].map do |result| # TODO: error handling
-      {
-        "obs" => result["obs"]["value"],
-        # XXX: hard-coding data types for now
-        "mean" => (Float(result["mean"]["value"]) rescue nil),
-        "uom" => (result["uom"]["value"] rescue nil),
-        "title" => (result["title"]["value"] rescue nil),
-        "desc" => (result["desc"]["value"] rescue nil),
-        "source" => make_link(result, "dataset", "dlbl"),
-        "medium" => make_link(result, "medium", "mlbl"),
-        "analyte" => make_link(result, "analyte", "albl"),
-        "location" => make_link(result, "location", "llbl"),
-        "time" => ["startTime", "endTime"].map do |key|
-          Float(result[key]["value"]).to_i rescue nil
-        end
-      }
+      obs = Observation.new(result["obs"]["value"])
+      obs.mean = Float(result["mean"]["value"]) rescue nil
+      obs.uom = result["uom"]["value"] rescue nil
+      obs.title = result["title"]["value"] rescue nil
+      obs.desc = result["desc"]["value"] rescue nil
+      obs.source = make_link(result, "dataset", "dlbl")
+      obs.medium = make_link(result, "medium", "mlbl")
+      obs.analyte = make_link(result, "analyte", "albl")
+      obs.location = make_link(result, "location", "llbl")
+      obs.time = ["startTime", "endTime"].map do |key|
+        Float(result[key]["value"]).to_i rescue nil
+      end
+      obs
     end
   end
 
