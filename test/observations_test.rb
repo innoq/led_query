@@ -43,7 +43,7 @@ led:trier a skos:Concept;
 
 led:obs123 upb:extractionMethod upb:kw .
 
-upb:kw a upb:extractionMethod ;
+upb:kw a upb:extractionMethod;
     skos:prefLabel "Königswasser"@de .
     EOS
     @store.add_triples @repo, "text/turtle", rdf
@@ -56,7 +56,7 @@ upb:kw a upb:extractionMethod ;
 @prefix qb: <http://purl.org/linked-data/cube#> .
 @prefix upb: <led://data.uba.de/upb/> .
 
-upb:extractionMethod a qb:DimensionProperty ;
+upb:extractionMethod a qb:DimensionProperty;
     skos:prefLabel "Extraktionsmethode"@de .
     EOS
     @store.add_triples @repo, "text/turtle", rdf
@@ -69,6 +69,37 @@ upb:extractionMethod a qb:DimensionProperty ;
     upb = "led://data.uba.de/upb/"
     assert_equal extras.join("\n"), <<-EOS.strip
 "Extraktionsmethode"<#{upb}extractionMethod>: "Königswasser"<#{upb}kw>
+    EOS
+
+    rdf = <<-EOS
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix led: <http://data.uba.de/led/> .
+@prefix upb: <led://data.uba.de/upb/> .
+
+led:obs123 upb:gender "weiblich";
+    upb:weight 6.93;
+    upb:total 7 .
+
+upb:gender a qb:AttributeProperty;
+    skos:prefLabel "Geschlecht"@de .
+upb:weight a qb:AttributeProperty;
+    skos:prefLabel "Gewicht"@de .
+upb:total a qb:AttributeProperty;
+    skos:prefLabel "Anzahl"@de .
+    EOS
+    @store.add_triples @repo, "text/turtle", rdf
+
+    observations = @db.determine_observations({})
+    obs = observations["#{@led}obs123"]
+    extras = obs.extras.map do |key, value|
+      "#{key}: #{value.map(&:to_s).join(", ")}"
+    end
+    upb = "led://data.uba.de/upb/"
+    assert_equal extras.sort.join("\n"), <<-EOS.strip
+"Anzahl"<#{upb}total>: 7
+"Extraktionsmethode"<#{upb}extractionMethod>: "Königswasser"<#{upb}kw>
+"Geschlecht"<#{upb}gender>: weiblich
+"Gewicht"<#{upb}weight>: 6.93
     EOS
   end
 

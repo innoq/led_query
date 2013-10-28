@@ -37,7 +37,9 @@ WHERE {
     OPTIONAL { ?dataset skos:prefLabel ?dlbl . }
 
     OPTIONAL {
-      ?extraDim a qb:DimensionProperty .
+      { ?extraDim a qb:DimensionProperty . }
+      UNION
+      { ?extraDim a qb:AttributeProperty . }
       FILTER(!STRSTARTS(STR(?extraDim), "http://data.uba.de/led/"))
       ?obs ?extraDim ?extraDimValue .
       OPTIONAL { ?extraDim skos:prefLabel ?xdlbl . }

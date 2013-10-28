@@ -28,6 +28,7 @@ class LEDQuery::Database
     })
 
     observations = res["results"]["bindings"] rescue []
+    xsd = "http://www.w3.org/2001/XMLSchema#"
     return observations.inject({}) do |memo, result|
       uri = result["obs"]["value"]
       memo[uri] ||= LEDQuery::Observation.new(uri)
@@ -53,7 +54,17 @@ class LEDQuery::Database
       extra_dim = make_link(result, "extraDim", "xdlbl") rescue nil
       if extra_dim
         obs.extras[extra_dim] ||= Set.new
-        obs.extras[extra_dim] << make_link(result, "extraDimValue", "xdvlbl") rescue nil
+        value = result["extraDimValue"]
+        case value["type"] # XXX: this should be generic functionality
+        when "uri"
+          value = make_link(result, "extraDimValue", "xdvlbl")
+        when "literal"
+          value = value["value"]
+        when "typed-literal"
+          value = value["datatype"] == "#{xsd}decimal" ? Float(value["value"]) :
+              Float(value["value"]).to_i
+        end
+        obs.extras[extra_dim] << value
       end
 
       memo
