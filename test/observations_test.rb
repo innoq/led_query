@@ -68,7 +68,7 @@ upb:extractionMethod a qb:DimensionProperty;
     end
     upb = "led://data.uba.de/upb/"
     assert_equal extras.join("\n"), <<-EOS.strip
-"Extraktionsmethode"<#{upb}extractionMethod>: "Königswasser"<#{upb}kw>
+"Extraktionsmethode"@de<#{upb}extractionMethod>: "Königswasser"@de<#{upb}kw>
     EOS
 
     rdf = <<-EOS
@@ -96,10 +96,10 @@ upb:total a qb:AttributeProperty;
     end
     upb = "led://data.uba.de/upb/"
     assert_equal extras.sort.join("\n"), <<-EOS.strip
-"Anzahl"<#{upb}total>: 7
-"Extraktionsmethode"<#{upb}extractionMethod>: "Königswasser"<#{upb}kw>
-"Geschlecht"<#{upb}gender>: weiblich
-"Gewicht"<#{upb}weight>: 6.93
+"Anzahl"@de<#{upb}total>: 7
+"Extraktionsmethode"@de<#{upb}extractionMethod>: "Königswasser"@de<#{upb}kw>
+"Geschlecht"@de<#{upb}gender>: weiblich
+"Gewicht"@de<#{upb}weight>: 6.93
     EOS
   end
 

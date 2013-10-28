@@ -214,9 +214,9 @@ led:obs789 a qb:Observation;
           join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
-#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Flusswasser"<#{@led}fluvialWater> | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
-#{@led}obs321 | 3.21 | mg/l N | [1996, 1996] | "Flusswasser"<#{@led}fluvialWater> | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
-#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Flusswasser"<#{@led}fluvialWater> | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Umweltprobenbank"<#{@led}upb>
+#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Flusswasser"@de<#{@led}fluvialWater> | "Ammonium"@de<#{@led}ammonium> | "Berlin"@de<#{@led}berlin> | "Europäische Umweltagentur"@de<#{@led}eea>
+#{@led}obs321 | 3.21 | mg/l N | [1996, 1996] | "Flusswasser"@de<#{@led}fluvialWater> | "Ammonium"@de<#{@led}ammonium> | "Berlin"@de<#{@led}berlin> | "Europäische Umweltagentur"@de<#{@led}eea>
+#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Flusswasser"@de<#{@led}fluvialWater> | "Stickstoff"@de<#{@led}nitrogen> | "Berlin"@de<#{@led}berlin> | "Umweltprobenbank"@de<#{@led}upb>
     EOS
 
     counts = @db.observations_count({
@@ -323,8 +323,8 @@ led:obs987 a qb:Observation; # NB: no temporal reference
           join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
-#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Ammonium"<#{@led}ammonium> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
-#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Ammonium"@de<#{@led}ammonium> | "Berlin"@de<#{@led}berlin> | "Europäische Umweltagentur"@de<#{@led}eea>
+#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"@de<#{@led}nitrogen> | "Berlin"@de<#{@led}berlin> | "Europäische Umweltagentur"@de<#{@led}eea>
     EOS
 
     selected_concepts = {
@@ -342,7 +342,7 @@ led:obs987 a qb:Observation; # NB: no temporal reference
           join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
-#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"<#{@led}nitrogen> | "Berlin"<#{@led}berlin> | "Europäische Umweltagentur"<#{@led}eea>
+#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"@de<#{@led}nitrogen> | "Berlin"@de<#{@led}berlin> | "Europäische Umweltagentur"@de<#{@led}eea>
     EOS
 
     # ensure temporal references are optional
@@ -358,10 +358,10 @@ led:obs987 a qb:Observation; # NB: no temporal reference
           join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
-#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Berlin"<#{@led}berlin>
-#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Berlin"<#{@led}berlin>
-#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Berlin"<#{@led}berlin>
-#{@led}obs987 | 9.87 | mg/l N |  | "Berlin"<#{@led}berlin>
+#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Berlin"@de<#{@led}berlin>
+#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Berlin"@de<#{@led}berlin>
+#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Berlin"@de<#{@led}berlin>
+#{@led}obs987 | 9.87 | mg/l N |  | "Berlin"@de<#{@led}berlin>
     EOS
   end
 

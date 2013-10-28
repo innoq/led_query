@@ -19,6 +19,10 @@ class LEDQuery::Observation
     return self.send(key)
   end
 
+  def []=(key, value)
+    return self.send("#{key}=", value)
+  end
+
   def is_metadata?
     return @mean.empty?
   end
@@ -26,11 +30,12 @@ class LEDQuery::Observation
 end
 
 class LEDQuery::Link
-  attr_reader :uri
+  attr_reader :uri, :label_lang
 
-  def initialize(uri, label=nil)
+  def initialize(uri, label=nil, label_lang=nil)
     @uri = uri
     @label = label
+    @lang = label_lang if @label
   end
 
   def label
@@ -42,12 +47,16 @@ class LEDQuery::Link
   end
 
   def hash
-    return [@uri, @label].hash
+    return [@uri, @label, @lang].hash
   end
 
   def to_s
     res = "<#{@uri}>"
-    return @label ? %("#{@label}"#{res}) : res
+    if @label
+      lang = @lang ? "@#{@lang}" : nil
+      res = [%("#{@label}"), lang, res].join("")
+    end
+    return res
   end
 
   def inspect

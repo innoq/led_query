@@ -212,8 +212,10 @@ class LEDQuery::Database
   end
 
   def make_link(result, uri_key, label_key)
-    label = result[label_key]["value"] rescue nil
-    return LEDQuery::Link.new(result[uri_key]["value"], label)
+    label = result[label_key]
+    lang = label ? label["xml:lang"] : nil
+    label = label["value"] if label
+    return LEDQuery::Link.new(result[uri_key]["value"], label, lang)
   end
 
   def sparql(query_template, query_params={}, force_infer=false)

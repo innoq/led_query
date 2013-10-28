@@ -47,7 +47,7 @@ led:sand a skos:Concept;
           join(" | ")
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
-#{@led}soil123 |  |  | Hello World | lorem ipsum dolor sit amet | [1996, 1996] | "Sand"<#{@led}sand> | "Westerzgebirge"<#{@led}westerzgebirge> | "Bodenportal"<#{@led}bodenportal>
+#{@led}soil123 |  |  | Hello World | lorem ipsum dolor sit amet | [1996, 1996] | "Sand"@de<#{@led}sand> | "Westerzgebirge"@de<#{@led}westerzgebirge> | "Bodenportal"@de<#{@led}bodenportal>
     EOS
   end
 
