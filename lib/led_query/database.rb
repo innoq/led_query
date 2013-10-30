@@ -15,6 +15,7 @@ class LEDQuery::Database
 
   # determine observations for the given concepts and from the given sources
   # (all URIs)
+  # NB: while pagination is supported, it does not actually ease the server load
   # returns a list of hashes representing individual observations
   def determine_observations(concepts_by_dimension, include_descendants=false,
       items_per_page=nil, page_num=nil)
