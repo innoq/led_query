@@ -46,3 +46,8 @@ WHERE {
       OPTIONAL { ?extraDimValue skos:prefLabel ?xdvlbl . }
     }
 }
+ORDER BY ?obs
+<% if limit %>
+LIMIT <%= limit %>
+OFFSET <%= offset || 0 %>
+<% end %>

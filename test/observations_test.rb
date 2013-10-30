@@ -91,8 +91,8 @@ upb:total a qb:AttributeProperty;
 
     observations = @db.determine_observations({})
     obs = observations["#{@led}obs123"]
-    extras = obs.extras.map do |key, value|
-      "#{key}: #{value.map(&:to_s).join(", ")}"
+    extras = obs.extras.map do |key, values|
+      "#{key}: #{values.map(&:to_s).join(", ")}"
     end
     upb = "led://data.uba.de/upb/"
     assert_equal extras.sort.join("\n"), <<-EOS.strip

@@ -16,7 +16,8 @@ class LEDQuery::Database
   # determine observations for the given concepts and from the given sources
   # (all URIs)
   # returns a list of hashes representing individual observations
-  def determine_observations(concepts_by_dimension, include_descendants=false)
+  def determine_observations(concepts_by_dimension, include_descendants=false,
+      items_per_page=nil, page_num=nil)
     log :info, "querying observations"
     res = sparql("determine_observations", {
       :include_descendants => include_descendants,
@@ -24,7 +25,9 @@ class LEDQuery::Database
           inject({}) do |memo, (dim, concepts)|
         memo[dim] = resource_list(concepts)
         memo
-      end
+      end,
+      :limit => items_per_page,
+      :offset => page_num ? (page_num - 1) * items_per_page : 0
     })
 
     observations = res["results"]["bindings"] rescue []
