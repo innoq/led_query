@@ -24,7 +24,7 @@ class LEDQuery::Observation
   end
 
   def is_metadata?
-    return @mean.empty?
+    return @mean.empty? && @uom.empty? && !@title.empty?
   end
 
 end
