@@ -163,6 +163,25 @@ class LEDQuery::Database
     end
   end
 
+  def resource_details(uri)
+    log :info, "querying resource details"
+    res = sparql("resource_details", { "uri" => "<#{uri}>" })
+    return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
+      prd = result["prd"]["value"]
+      memo[prd] ||= Set.new
+      obj = result["obj"]
+      case obj["type"] # XXX: this should be generic functionality
+      when "uri"
+        memo[prd] << LEDQuery::Link.new(obj["value"])
+      when "literal"
+        memo[prd] << LEDQuery::Link.new(nil, obj["value"], obj["xml:lang"]) # XXX: abuse!?
+      else
+        # TODO?
+      end
+      memo
+    end
+  end
+
   def observations_count(concepts_by_dimension={}, include_descendants=false)
     log :info, "querying observations count"
     res = sparql("determine_observations_count", { # XXX: largely duplicates `determine_observations`
