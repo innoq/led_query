@@ -35,7 +35,7 @@ class LEDQuery::Link
   def initialize(uri, label=nil, label_lang=nil)
     @uri = uri
     @label = label
-    @lang = label_lang if @label
+    @label_lang = label_lang if @label
   end
 
   def label
@@ -47,13 +47,13 @@ class LEDQuery::Link
   end
 
   def hash
-    return [@uri, @label, @lang].hash
+    return [@uri, @label, @label_lang].hash
   end
 
   def to_s
     res = "<#{@uri}>"
     if @label
-      lang = @lang ? "@#{@lang}" : nil
+      lang = @label_lang ? "@#{@label_lang}" : nil
       res = [%("#{@label}"), lang, res].join("")
     end
     return res
