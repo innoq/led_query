@@ -182,6 +182,19 @@ class LEDQuery::Database
     end
   end
 
+  def resource_labels(*uris)
+    log :info, "querying resource labels"
+    res = sparql("resource_labels", { "uris" => resource_list(uris) })
+    return res["results"]["bindings"].inject({}) do |memo, result| # TODO: error handling
+      uri = result["uri"]["value"]
+      label = result["label"]
+      lang = label["xml:lang"]
+      memo[uri] ||= {}
+      memo[uri][lang] = label["value"]
+      memo
+    end
+  end
+
   def observations_count(concepts_by_dimension={}, include_descendants=false)
     log :info, "querying observations count"
     res = sparql("determine_observations_count", { # XXX: largely duplicates `determine_observations`

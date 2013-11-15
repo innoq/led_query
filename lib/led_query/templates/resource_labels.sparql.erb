@@ -1,0 +1,9 @@
+#META infer: false
+
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX qb:<http://purl.org/linked-data/cube#>
+
+SELECT DISTINCT ?uri ?label WHERE {
+    ?uri skos:prefLabel ?label .
+    FILTER(?uri IN (<%= uris %>))
+}
