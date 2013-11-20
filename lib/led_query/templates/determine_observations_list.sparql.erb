@@ -1,0 +1,50 @@
+#META infer: <%= !!include_descendants %>
+
+PREFIX dct:<http://purl.org/dc/terms/>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX qb:<http://purl.org/linked-data/cube#>
+PREFIX led:<http://data.uba.de/led/>
+
+SELECT DISTINCT
+    ?obs ?title ?description
+WHERE {
+    <%= render.call("_concepts_query",
+            :concepts_by_dimension => concepts_by_dimension,
+            :include_descendants => include_descendants) %>
+
+    ?obs a qb:Observation .
+    
+    OPTIONAL {
+      ?obs dct:title ?selectedLangTitle
+      FILTER(LANGMATCHES(LANG(?selectedLangTitle), 'de'))
+    }
+    OPTIONAL {
+      ?obs dct:title ?defaultLangTitle
+      FILTER(LANGMATCHES(LANG(?defaultLangTitle), 'en'))
+    }
+    OPTIONAL {
+      ?obs dct:title ?noLangTitle
+      FILTER(LANGMATCHES(LANG(?noLangTitle), ''))
+    }
+    BIND(STR(COALESCE(?selectedLangTitle,?defaultLangTitle,?noLangTitle ,'missing title')) AS ?title)
+    
+    OPTIONAL {
+      ?obs dct:description ?selectedLangDescription
+      FILTER(LANGMATCHES(LANG(?selectedLangDescription), 'de'))
+    }
+    OPTIONAL {
+      ?obs dct:description ?defaultLangDescription
+      FILTER(LANGMATCHES(LANG(?defaultLangDescription), 'en'))
+    }
+    OPTIONAL {
+      ?obs dct:description ?noLangDescription
+      FILTER(LANGMATCHES(LANG(?noLangDescription), ''))
+    }
+    BIND(STR(COALESCE(?selectedLangDescription,?defaultLangDescription,?noLangDescription ,'missing description')) AS ?description)
+
+}
+ORDER BY ?obs
+<% if limit %>
+LIMIT <%= limit %>
+OFFSET <%= offset || 0 %>
+<% end %>
