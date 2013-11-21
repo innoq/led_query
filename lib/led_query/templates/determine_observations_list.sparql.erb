@@ -41,7 +41,7 @@ WHERE {
       FILTER(LANGMATCHES(LANG(?noLangDescription), ''))
     }
     BIND(STR(COALESCE(?selectedLangDescription,?defaultLangDescription,?noLangDescription ,'missing description')) AS ?description)
-
+    <%= temporal if temporal %>
 }
 ORDER BY ?obs
 <% if limit %>
