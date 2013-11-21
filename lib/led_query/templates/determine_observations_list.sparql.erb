@@ -13,6 +13,7 @@ WHERE {
             :include_descendants => include_descendants) %>
 
     ?obs a qb:Observation .
+    ?obs led:source led:bodenportal .
     
     OPTIONAL {
       ?obs dct:title ?selectedLangTitle
@@ -41,7 +42,9 @@ WHERE {
       FILTER(LANGMATCHES(LANG(?noLangDescription), ''))
     }
     BIND(STR(COALESCE(?selectedLangDescription,?defaultLangDescription,?noLangDescription ,'missing description')) AS ?description)
-    <%= temporal if temporal %>
+    
+    <%= render.call("_temporal_query",
+            :temporal => temporal) %>
 }
 ORDER BY ?obs
 <% if limit %>

@@ -1,0 +1,12 @@
+OPTIONAL{
+  ?obs led:temporal ?temporal .
+  ?temporal dct:start ?tStart .
+  ?temporal dct:end ?tEnd .
+}
+<% if temporal.start  %>
+  FILTER(xsd:dateTime(?tStart) >= '<%= temporal.start%>T00:00:00Z'^^xsd:dateTime)
+<% end %>
+
+<% if temporal.end %>
+  FILTER(xsd:dateTime(?tEnd) <= '<%= temporal.end %>T00:00:00Z'^^xsd:dateTime) .
+<% end %>

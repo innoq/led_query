@@ -6,13 +6,13 @@ PREFIX qb:<http://purl.org/linked-data/cube#>
 PREFIX led:<http://data.uba.de/led/>
 PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
 
-SELECT (COUNT(?obs) AS ?obsCount)  ?label (led:bodendaten as ?dataset) WHERE {
+SELECT (COUNT(DISTINCT(?obs)) AS ?obsCount)  ?label (led:bodendaten as ?dataset) WHERE {
     <%= render.call("_concepts_query",
             :concepts_by_dimension => concepts_by_dimension,
             :include_descendants => include_descendants) %>
     ?obs led:source led:bodenportal .
     ?obs a qb:Observation .
-    <%= temporal if temporal %>
+    <%= render.call("_temporal_query", :temporal => temporal) %>
     OPTIONAL { led:bodenportal skos:prefLabel ?label }
 
 } GROUP BY ?label 
