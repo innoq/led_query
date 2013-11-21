@@ -195,10 +195,11 @@ class LEDQuery::Database
     end
   end
 
-  def observations_count(concepts_by_dimension={}, include_descendants=false)
+  def observations_count(concepts_by_dimension={},temporal=nil ,include_descendants=false)
     log :info, "querying observations count"
     res = sparql("determine_observations_count", { # XXX: largely duplicates `determine_observations`
       :include_descendants => include_descendants,
+      :temporal => temporal,
       :concepts_by_dimension => concepts_by_dimension.
           inject({}) do |memo, (dim, concepts)|
         memo[dim] = resource_list(concepts)
