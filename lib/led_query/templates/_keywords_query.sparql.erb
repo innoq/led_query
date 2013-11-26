@@ -1,0 +1,2 @@
+OPTIONAL{?obs dcat:keyword ?keywords }
+FILTER( encode_for_uri(str(?keywords)) IN (<%= keywords.map {|keyword| "'#{URI.escape(keyword)}'"}.join(', ') %>) )

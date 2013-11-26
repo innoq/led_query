@@ -1,0 +1,2 @@
+OPTIONAL{?obs dct:title ?title }
+FILTER( contains(LCASE(str(?title)),"<%= title.downcase.gsub(/'/,"\'") %>") )
