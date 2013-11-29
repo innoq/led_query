@@ -238,11 +238,13 @@ class LEDQuery::Database
 
   def resource_list(concepts)
     res = concepts.map do |concept|
-      begin # number -- XXX: special-casing for years
+      begin
         Float(concept).to_i
+        timestamp = true
       rescue ArgumentError # URI
-        "<#{concept}>"
+        timestamp = concept =~ /\d{4}-\d{2}-\d{2}.\d{2}:\d{2}:\d{2}/
       end
+      timestamp ? %Q("#{concept}") : "<#{concept}>" # XXX: special-casing
     end.join(", ")
     return res
   end

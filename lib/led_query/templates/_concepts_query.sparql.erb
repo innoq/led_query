@@ -4,5 +4,9 @@
             :include_descendants => include_descendants,
             :var => i
     } %>
+    <% if dim == "http://data.uba.de/led/temporal" %> <%# XXX: special-casing %>
+    FILTER(str(?concept<%= i %>) IN (<%= concepts %>))
+    <% else %>
     FILTER(?concept<%= i %> IN (<%= concepts %>))
+    <% end %>
 <% end %>
