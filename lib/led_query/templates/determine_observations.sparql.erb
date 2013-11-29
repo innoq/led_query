@@ -21,13 +21,13 @@ WHERE {
     ?obs led:location ?location .
     ?obs led:observedMedia ?medium .
     ?obs led:source ?dataset .
-    ?obs led:temporal ?time .
     ?obs a qb:Observation .
     OPTIONAL { ?obs led:mean ?mean } .
     OPTIONAL { ?obs led:uom ?uom } .
     OPTIONAL { ?obs dct:title ?title } .
     OPTIONAL { ?obs dct:description ?desc } .
     OPTIONAL {
+        ?obs led:temporal ?time .
         ?time dct:start ?startTime .
         ?time dct:end ?endTime .
     }
