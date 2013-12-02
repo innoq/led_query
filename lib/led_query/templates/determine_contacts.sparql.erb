@@ -1,0 +1,42 @@
+PREFIX qb:<http://purl.org/linked-data/cube#>
+PREFIX vcard:<http://www.w3.org/2006/vcard/ns#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dct:<http://purl.org/dc/terms/>
+PREFIX led:<http://data.uba.de/led/>
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX rdvoc:<http://rdvocab.info/roles/>
+
+SELECT ?type ?type_label ?name ?email ?vcard_phonenumber ?membername ?member_email ?phonenumber 
+  WHERE{
+      <%= id %> a qb:Observation .
+      <%= id %> ?type ?vcard .
+      FILTER(?type IN (rdvoc:custodian, dct:creator, led:processor, led:contact, led:owner, led:principalInvestigator, led:user, led:nationalContact, led:nationalProvider, led:resourceProvider))
+      <%= render.call('_optional_literal_query', binding:'type_label', subject:'?type', predicate:'skos:prefLabel', lang:'de', default_lang:'en' )%>
+    OPTIONAL{
+      ?vcard vcard:formattedName ?name .
+    }
+    OPTIONAL{
+       ?vcard vcard:formattedName ?name .
+    }
+    optional {
+      ?vcard vcard:email ?email .
+    }
+    optional {
+      ?vcard vcard:hasTelephone ?vcardPhone .
+      ?vcardPhone vcard:telephone ?vcard_phonenumber .
+    }
+    OPTIONAL{
+    ?vcard vcard:member ?member .
+      OPTIONAL{
+        ?member vcard:formattedName ?membername .
+      }
+      optional{
+        ?member vcard:email ?member_email .
+      }
+      optional{
+        ?member vcard:hasTelephone ?phone .
+        ?phone vcard:telephone ?phonenumber .
+      }
+    }
+}

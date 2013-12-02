@@ -5,17 +5,21 @@ PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
 PREFIX qb:<http://purl.org/linked-data/cube#>
 PREFIX led:<http://data.uba.de/led/>
 PREFIX dcat:<http://www.w3.org/ns/dcat#>
+PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT
-    ?obs ?title ?description
+    ?obs ?title ?description ?pdf_link
 WHERE {
     <%= render.call("_concepts_query",
             :concepts_by_dimension => concepts_by_dimension,
             :include_descendants => include_descendants) %>
 
     ?obs a qb:Observation .
-
     
+    OPTIONAL{
+     ?obs rdf:seeAlso ?node .
+     ?node foaf:page ?pdf_link .
+    }
     OPTIONAL {
       ?obs dct:title ?selectedLangTitle
       FILTER(LANGMATCHES(LANG(?selectedLangTitle), 'de'))

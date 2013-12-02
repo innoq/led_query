@@ -1,0 +1,14 @@
+OPTIONAL {
+  <%=subject%> <%=predicate%> ?selectedLang<%=binding.capitalize%>
+  FILTER(LANGMATCHES(LANG(?selectedLang<%=binding.capitalize%>), '<%=lang%>'))
+}
+OPTIONAL {
+  <%=subject%> <%=predicate%> ?defaultLang<%=binding.capitalize%>
+  FILTER(LANGMATCHES(LANG(?defaultLang<%=binding.capitalize%>), '<%=default_lang%>'))
+}
+
+OPTIONAL {
+  <%=subject%> <%=predicate%> ?noLang<%=binding.capitalize%>
+  FILTER(LANGMATCHES(LANG(?noLang<%=binding.capitalize%>), ''))
+}
+BIND(COALESCE(?selectedLang<%=binding.capitalize%>,?defaultLang<%=binding.capitalize%>,?noLang<%=binding.capitalize%> ,'missing <%=binding%>') AS ?<%=binding%>)

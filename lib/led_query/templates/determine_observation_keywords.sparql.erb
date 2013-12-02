@@ -1,0 +1,12 @@
+
+PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+PREFIX qb:<http://purl.org/linked-data/cube#>
+PREFIX led:<http://data.uba.de/led/>
+PREFIX dcat:<http://www.w3.org/ns/dcat#>
+
+SELECT ?keyword
+WHERE {
+  <%= id %> a qb:Observation .
+  <%= id %> led:source led:bodenportal .
+  <%= id %> dcat:keyword ?keyword .
+}
