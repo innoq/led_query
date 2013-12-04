@@ -236,7 +236,7 @@ led:obs789 a qb:Observation;
     }
   end
 
-  def test_time_handling
+  def test_temporal_handling
     prefixes = "@prefix dct: <http://purl.org/dc/terms/>."
     rdf = prefixes + File.read(@common) + <<-EOS
 led:eea a qb:DataSet, skos:Concept;
@@ -343,25 +343,6 @@ led:obs987 a qb:Observation; # NB: no temporal reference
     end.sort.join("\n")
     assert_equal results, <<-EOS.strip
 #{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Stickstoff"@de<#{@led}nitrogen> | "Berlin"@de<#{@led}berlin> | "Europäische Umweltagentur"@de<#{@led}eea>
-    EOS
-
-    # ensure temporal references are optional
-    selected_concepts = { "#{@led}location" => ["#{@led}berlin"] }
-    counts = @db.observations_count(selected_concepts)
-    count = counts["#{@led}eea"]["count"]
-    observations = @db.determine_observations(selected_concepts)
-    assert_equal count, 4
-    assert_equal observations.length, count
-    results = observations.map do |uri, obs|
-      ["mean", "uom", "time", "location"].
-          map { |attr| obs[attr].map(&:to_s).join(", ") }.unshift(uri).
-          join(" | ")
-    end.sort.join("\n")
-    assert_equal results, <<-EOS.strip
-#{@led}obs123 | 1.23 | mg/l N | [2001, 2001] | "Berlin"@de<#{@led}berlin>
-#{@led}obs321 | 3.21 | mg/l N | [2001, 2001] | "Berlin"@de<#{@led}berlin>
-#{@led}obs789 | 7.89 | mg/l N | [2011, 2011] | "Berlin"@de<#{@led}berlin>
-#{@led}obs987 | 9.87 | mg/l N |  | "Berlin"@de<#{@led}berlin>
     EOS
   end
 
