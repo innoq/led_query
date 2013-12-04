@@ -31,10 +31,18 @@ WHERE {
         ?time dct:start ?startTime .
         ?time dct:end ?endTime .
     }
-    OPTIONAL { ?medium skos:prefLabel ?mlbl . }
-    OPTIONAL { ?analyte skos:prefLabel ?albl . }
-    OPTIONAL { ?location skos:prefLabel ?llbl . }
-    OPTIONAL { ?dataset skos:prefLabel ?dlbl . }
+    <%= render.call("_literal_query", :prd => "skos:prefLabel",
+            :sbj => "?medium", :litvar => "?mlbl",
+            :pref_lang => "de", "fallback_lang" => "en") %>
+    <%= render.call("_literal_query", :prd => "skos:prefLabel",
+            :sbj => "?analyte", :litvar => "?albl",
+            :pref_lang => "de", "fallback_lang" => "en") %>
+    <%= render.call("_literal_query", :prd => "skos:prefLabel",
+            :sbj => "?location", :litvar => "?llbl",
+            :pref_lang => "de", "fallback_lang" => "en") %>
+    <%= render.call("_literal_query", :prd => "skos:prefLabel",
+            :sbj => "?dataset", :litvar => "?dlbl",
+            :pref_lang => "de", "fallback_lang" => "en") %>
 
     OPTIONAL {
       { ?extraDim a qb:DimensionProperty . }
@@ -42,8 +50,12 @@ WHERE {
       { ?extraDim a qb:AttributeProperty . }
       FILTER(!STRSTARTS(STR(?extraDim), "http://data.uba.de/led/"))
       ?obs ?extraDim ?extraDimValue .
-      OPTIONAL { ?extraDim skos:prefLabel ?xdlbl . }
-      OPTIONAL { ?extraDimValue skos:prefLabel ?xdvlbl . }
+      <%= render.call("_literal_query", :prd => "skos:prefLabel",
+              :sbj => "?extraDim", :litvar => "?xdlbl",
+              :pref_lang => "de", "fallback_lang" => "en") %>
+      <%= render.call("_literal_query", :prd => "skos:prefLabel",
+              :sbj => "?extraDimValue", :litvar => "?xdvlbl",
+              :pref_lang => "de", "fallback_lang" => "en") %>
     }
 }
 ORDER BY ?obs

@@ -1,0 +1,14 @@
+OPTIONAL {
+    <%= sbj %> <%= prd %> <%= litvar %>PrefLang
+    FILTER(LANGMATCHES(LANG(<%= litvar %>PrefLang), "<%= pref_lang %>"))
+}
+OPTIONAL {
+    <%= sbj %> <%= prd %> <%= litvar %>FallbackLang
+    FILTER(LANGMATCHES(LANG(<%= litvar %>FallbackLang), "<%= fallback_lang %>"))
+}
+OPTIONAL {
+    <%= sbj %> <%= prd %> <%= litvar %>NoLang
+    FILTER(LANGMATCHES(LANG(<%= litvar %>NoLang), ""))
+}
+BIND(COALESCE(<%= litvar %>PrefLang, <%= litvar %>FallbackLang,
+    <%= litvar %>NoLang) AS <%= litvar %>)
