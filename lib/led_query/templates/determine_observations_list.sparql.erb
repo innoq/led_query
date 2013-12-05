@@ -8,13 +8,15 @@ PREFIX dcat:<http://www.w3.org/ns/dcat#>
 PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT
-    ?obs ?title ?description ?pdf_link
+    ?obs ?title ?description ?pdf_link ?edited_at
 WHERE {
     <%= render.call("_concepts_query",
             :concepts_by_dimension => concepts_by_dimension,
             :include_descendants => include_descendants) %>
 
     ?obs a qb:Observation .
+    
+    ?obs dct:modified ?edited_at .
     
     OPTIONAL{
      ?obs rdf:seeAlso ?node .

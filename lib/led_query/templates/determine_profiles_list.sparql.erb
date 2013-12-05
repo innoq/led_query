@@ -8,15 +8,17 @@ PREFIX dcat:<http://www.w3.org/ns/dcat#>
 PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT
-    ?obs ?title ?description ?pdf_link
+    ?obs ?title ?description ?pdf_link ?edited_at
 WHERE {
     ?obs a qb:Observation .
     ?obs led:source led:bodenportal .
+   ?obs dct:modified ?edited_at .
     
    ?obs rdf:seeAlso ?node .
    ?node foaf:page ?pdf_link .
-   FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(bodendaten.de/uploads/pdf_profile/)","i"))
-  
+   
+#   FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(bodendaten.de/uploads/pdf_profile/)","i"))
+  FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(innoq.github.io/bodenportal/profiles/)","i"))
     OPTIONAL {
       ?obs dct:title ?selectedLangTitle
       FILTER(LANGMATCHES(LANG(?selectedLangTitle), 'de'))
