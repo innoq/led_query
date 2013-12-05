@@ -11,7 +11,9 @@ SELECT DISTINCT <%= bindings.join(" ") %> WHERE {
             :var => nil
     } %>
     BIND (<%= dimension %> AS ?type)
-    OPTIONAL { ?concept skos:prefLabel ?label }
+    <%= render.call("_literal_query", :prd => "skos:prefLabel",
+            :sbj => "?concept", :litvar => "?label",
+            :pref_lang => "de", "fallback_lang" => "en") %>
 
     <%= render.call("_concepts_query",
             :concepts_by_dimension => pre_existing_conditions,
@@ -22,7 +24,9 @@ SELECT DISTINCT <%= bindings.join(" ") %> WHERE {
         ?parent skos:narrower ?concept .
         ?ancestor skos:narrowerTransitive ?concept .
         OPTIONAL { ?grancestor skos:narrower ?ancestor }
-        OPTIONAL { ?ancestor skos:prefLabel ?ancLabel }
+        <%= render.call("_literal_query", :prd => "skos:prefLabel",
+                :sbj => "?ancestor", :litvar => "?ancLabel",
+                :pref_lang => "de", "fallback_lang" => "en") %>
     }
     <% end %>
 }
