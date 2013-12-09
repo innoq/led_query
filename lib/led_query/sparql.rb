@@ -12,6 +12,7 @@ module LEDQuery::SPARQL
         join("\n") if logger
     res = http_request("POST", endpoint, params,
         { "Accept" => "application/sparql-results+json" })
+    logger.debug "SPARQL response size: #{res.header["content-length"]}"
     return res.code == "200" ? JSON.load(res.body) : res
   end
 
