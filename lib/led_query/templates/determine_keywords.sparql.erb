@@ -16,4 +16,4 @@ WHERE {
     ?obs a qb:Observation .
     ?obs led:source led:bodenportal .
     ?obs dcat:keyword ?keyword
-}
+} ORDER BY (fn:lower-case(str(?keyword))) 
