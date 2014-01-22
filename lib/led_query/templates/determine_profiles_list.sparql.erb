@@ -51,5 +51,5 @@ BIND(STR(COALESCE(?selectedLangDescription,?defaultLangDescription,?noLangDescri
 ,'missing description')) AS ?description)
 
 }
-ORDER BY ?obs
+ORDER BY (fn:lower-case(str(?title))) 
 
