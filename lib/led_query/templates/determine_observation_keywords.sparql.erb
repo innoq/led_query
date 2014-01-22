@@ -9,4 +9,4 @@ WHERE {
   <%= id %> a qb:Observation .
   <%= id %> led:source led:bodenportal .
   <%= id %> dcat:keyword ?keyword .
-}
+}ORDER BY (fn:lower-case(str(?keyword))) 
