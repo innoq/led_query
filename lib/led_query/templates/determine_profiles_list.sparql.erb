@@ -8,17 +8,16 @@ PREFIX dcat:<http://www.w3.org/ns/dcat#>
 PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT
-    ?obs ?title ?description ?pdf_link ?edited_at
+    ?obs ?title ?pdf_link
 WHERE {
     ?obs a qb:Observation .
     ?obs led:source led:bodenportal .
-   ?obs dct:modified ?edited_at .
     
-   ?obs rdf:seeAlso ?node .
-   ?node foaf:page ?pdf_link .
+	?obs rdf:seeAlso ?node .
+	?node foaf:page ?pdf_link .
    
 #   FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(bodendaten.de/uploads/pdf_profile/)","i"))
-  FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(innoq.github.io/bodenportal/profiles/)","i"))
+	FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(innoq.github.io/bodenportal/profiles/)","i"))
     OPTIONAL {
       ?obs dct:title ?selectedLangTitle
       FILTER(LANGMATCHES(LANG(?selectedLangTitle), 'de'))
@@ -31,25 +30,7 @@ WHERE {
       ?obs dct:title ?noLangTitle
       FILTER(LANGMATCHES(LANG(?noLangTitle), ''))
     }
-    BIND(STR(COALESCE(?selectedLangTitle,?defaultLangTitle,?noLangTitle
-,'missing title')) AS ?title)
-    
-    OPTIONAL {
-      ?obs dct:description ?selectedLangDescription
-      FILTER(LANGMATCHES(LANG(?selectedLangDescription), 'de'))
-    }
-    OPTIONAL {
-      ?obs dct:description ?defaultLangDescription
-      FILTER(LANGMATCHES(LANG(?defaultLangDescription), 'en'))
-    }
-    OPTIONAL {
-      ?obs dct:description ?noLangDescription
-      FILTER(LANGMATCHES(LANG(?noLangDescription), ''))
-    }
-   
-BIND(STR(COALESCE(?selectedLangDescription,?defaultLangDescription,?noLangDescription
-,'missing description')) AS ?description)
-
+    BIND(STR(COALESCE(?selectedLangTitle, ?defaultLangTitle, ?noLangTitle,'missing title')) AS ?title)
 }
 ORDER BY (fn:lower-case(str(?title))) 
 
