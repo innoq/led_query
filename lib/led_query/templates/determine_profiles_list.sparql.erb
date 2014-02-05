@@ -8,11 +8,17 @@ PREFIX dcat:<http://www.w3.org/ns/dcat#>
 PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT
-    ?obs ?title ?pdf_link
+    ?obs ?title ?pdf_link ?providername ?partnername
 WHERE {
     ?obs a qb:Observation .
     ?obs led:source led:bodenportal .
-    
+
+	OPTIONAL{
+    	?obs led:provider-name ?providername .		
+	}
+	OPTIONAL {
+		?obs led:partner-name ?partnername .		
+	}
 	?obs rdf:seeAlso ?node .
 	?node foaf:page ?pdf_link .
    
