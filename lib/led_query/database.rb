@@ -2,7 +2,6 @@ require "erubis"
 require "led_query"
 require "led_query/models"
 require "led_query/sparql"
-
 class LEDQuery::Database
 
   # `triplestore` is the URL of the Sesame repository (typically

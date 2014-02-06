@@ -17,6 +17,7 @@ SELECT (COUNT(DISTINCT(?obs)) AS ?obsCount)  ?label (led:bodendaten as ?dataset)
     <%= render.call('_temporal_query', :temporal => temporal) if temporal.valid? %>
     <%= render.call('_keywords_query', :keywords => keywords) unless keywords.empty? %>
     <%= render.call('_title_query', :title => title) if title.present? %>
+    <%= render.call('_locations_query', :locations => locations) if locations.present? %>
     OPTIONAL { led:bodenportal skos:prefLabel ?label }
 
 } GROUP BY ?label 

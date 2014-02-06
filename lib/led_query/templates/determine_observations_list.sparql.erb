@@ -61,6 +61,7 @@ WHERE {
             :temporal => temporal) %>
     <%= render.call("_keywords_query", :keywords => keywords) unless keywords.empty? %>
     <%= render.call('_title_query', :title => title) if title.present? %>
+    <%= render.call("_locations_query", :locations => locations) unless locations.empty? %>
 }
 ORDER BY ?obs
 <% if limit %>
