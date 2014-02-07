@@ -1,2 +1,2 @@
 OPTIONAL{?obs dcat:keyword ?keywords }
-FILTER( encode_for_uri(str(?keywords)) IN (<%= keywords.map {|keyword| "'#{URI.escape(keyword)}'"}.join(', ') %>) )
+FILTER( MD5(str(?keywords)) IN (<%= keywords.map {|keyword| "'#{Digest::MD5.hexdigest(keyword)}'"}.join(', ') %>) )

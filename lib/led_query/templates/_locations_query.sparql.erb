@@ -1,2 +1,2 @@
 OPTIONAL{?obs led:location-name ?locations }
-FILTER( encode_for_uri(str(?locations)) IN (<%= locations.map {|location| "'#{URI.escape(location)}'"}.join(', ') %>) )
+FILTER( MD5(str(?locations)) IN (<%= locations.map {|location| "'#{Digest::MD5.hexdigest(location)}'"}.join(', ') %>) )
