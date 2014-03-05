@@ -8,10 +8,11 @@ PREFIX dcat:<http://www.w3.org/ns/dcat#>
 PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 
 SELECT DISTINCT
-    ?obs ?title ?pdf_link ?providername ?partnername
+    ?obs ?title ?providername ?partnername
 WHERE {
     ?obs a qb:Observation .
     ?obs led:source led:bodenportal .
+    FILTER(?obs IN (<%= profiles.join(', ') %>))
 
 	OPTIONAL{
     	?obs led:provider-name ?providername .		
@@ -19,11 +20,6 @@ WHERE {
 	OPTIONAL {
 		?obs led:partner-name ?partnername .		
 	}
-	?obs rdf:seeAlso ?node .
-	?node foaf:page ?pdf_link .
-   
-#   FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(bodendaten.de/uploads/pdf_profile/)","i"))
-	FILTER(regex(str(?pdf_link),"^(http(s)?://)(www.)?(innoq.github.io/bodenportal/profiles/)","i"))
     OPTIONAL {
       ?obs dct:title ?selectedLangTitle
       FILTER(LANGMATCHES(LANG(?selectedLangTitle), 'de'))
@@ -36,7 +32,8 @@ WHERE {
       ?obs dct:title ?noLangTitle
       FILTER(LANGMATCHES(LANG(?noLangTitle), ''))
     }
-    BIND(STR(COALESCE(?selectedLangTitle, ?defaultLangTitle, ?noLangTitle,'missing title')) AS ?title)
+    BIND(STR(COALESCE(?selectedLangTitle, ?defaultLangTitle, ?noLangTitle,'missing title')) AS ?title) 
+
 }
 ORDER BY (fn:lower-case(str(?title))) 
 

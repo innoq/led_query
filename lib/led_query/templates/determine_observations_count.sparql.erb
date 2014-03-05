@@ -14,6 +14,13 @@ SELECT (COUNT(DISTINCT(?obs)) AS ?obsCount)  ?label (led:bodendaten as ?dataset)
             :include_descendants => include_descendants) %>
     ?obs led:source led:bodenportal .
     ?obs a qb:Observation .
+
+    
+    
+    OPTIONAL{
+      ?obs dct:modified ?edited_at .
+    }
+    
     <%= render.call('_temporal_query', :temporal => temporal) if temporal.valid? %>
     <%= render.call('_keywords_query', :keywords => keywords) unless keywords.empty? %>
     <%= render.call('_title_query', :title => title) if title.present? %>

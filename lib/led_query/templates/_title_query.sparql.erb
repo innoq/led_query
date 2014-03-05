@@ -1,3 +1,3 @@
 OPTIONAL{?obs dct:title ?title }
 
-FILTER( contains( encode_for_uri(LCASE(str(?title))) , "<%= URI.escape(title.downcase.gsub(/'/,"\'")) %>") )
+FILTER(  REGEX(encode_for_uri(LCASE(str(?title))), "<%= URI.encode(title.downcase.gsub(/'/,"\'")).gsub(')',"%29").gsub('(',"%28") %>"))
